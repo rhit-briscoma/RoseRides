@@ -4,20 +4,55 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+  <link href="https://fonts.googleapis.com/css2?family=Jockey+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jockey+One&display=swap">
   <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
   <link rel="stylesheet" href="styles/main.css">
-  <title>App Name</title>
+  <title>RoseRides</title>
 </head>
 
 <body>
-  <nav class="navbar navbar-dark fixed-top">
-    <a class="navbar-brand" href="#">App Name</a>
-  </nav>
-  <div id="mainPage" class="container page-container">
+  <!-- <nav class="navbar navbar-dark fixed-top">
+    <a class="navbar-brand navbar-text" href="#">RoseRides</a>
+  </nav> -->
+
+  <!-- <div id="mainPage" class="container page-container">
 
 
+  </div> -->
+
+  <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
+    <header class="bmd-layout-header">
+      <div class="navbar navbar-dark fixed-top bg-faded justify-content-start">
+        <button class="navbar-toggler no-outline" type="button" data-toggle="drawer" data-target="#dw-p1">
+          <span class="sr-only">Toggle drawer</span>
+          <i class="material-icons no-outline rosered icon-medium">menu</i>
+        </button>
+        <a class="navbar-brand rosered jockey-one-regular navbar-text" href="#">&nbsp;&nbsp;RoseRides</a>
+        <button id="signInButton" type="button" class="btn text-white">Sign In</button>
+      </div>
+    </header>
+    
+    <div id="dw-p1" class="bmd-layout-drawer bg-faded">
+      <header>
+        <a class="navbar-brand">RoseRides</a>
+      </header>
+      <ul class="list-group">
+        <a id="menuShowAll" class="list-group-item"><i class="material-icons">info</i>About Us</a>
+        <!-- <a id="menuShowMyQuotes" class="list-group-item"><i class="material-icons">person</i>Show My Quotes</a> -->
+        <a id="menuSignOut" class="list-group-item"><i class="material-icons">login</i>Sign In</a>
+      </ul>
+    </div>
+    <main class="bmd-layout-content">
+      <div id="listPage" class="container page-container">
+        <div id="quoteListContainer"></div>
+      </div>
+    </main>
   </div>
+
   <script src="scripts/jquery.min.js"></script>
   <script src="scripts/popper.js"></script>
   <script src="scripts/bootstrap-material-design.js"></script>
