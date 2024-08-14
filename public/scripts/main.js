@@ -89,7 +89,7 @@ rhit.initializePage = function() {
 		console.log("You are on the home page");
 		const uid = urlParams.get("uid");
 
-		new rhit.ListPageController();
+		// new rhit.LoginPageController();
 	}
 
 	if (document.querySelector("#loginPage")) {
