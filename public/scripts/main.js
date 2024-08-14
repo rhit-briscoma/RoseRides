@@ -29,6 +29,11 @@ rhit.HomePageController = class {
 			console.log("TODO: Sign out");
 			rhit.fbAuthManager.signOut();
 		});
+
+		document.querySelector("#menuRiderDashboard").addEventListener("click", (event) => {
+			console.log("clicked Rider Dashboard");
+			window.location.href = "/riderDashboard.html";
+		});
 	}
 }
 
@@ -99,6 +104,10 @@ rhit.checkForRedirects = function() {
 	if (!document.querySelector("#loginPage") && !rhit.fbAuthManager.isSignedIn){
 		window.location.href = "/";
 	}
+
+	if (document.querySelector('#riderDashboardPage') && !rhit.fbAuthManager.isSignedIn){
+		window.location.href = "/rideList.html";
+	}
 };
 
 rhit.initializePage = function() {
@@ -114,6 +123,20 @@ rhit.initializePage = function() {
 	if (document.querySelector("#loginPage")) {
 		console.log("You are on the login page");
 		new rhit.LoginPageController();
+	}
+
+	if (document.querySelector("#riderDashboardPage")) {
+		console.log("You are on the rider dashboard page");
+		const uid = urlParams.get("uid");
+
+		new rhit.HomePageController();
+	}
+
+	if (document.querySelector("#aboutPage")) {
+		console.log("You are on the about page");
+		const uid = urlParams.get("uid");
+
+		new rhit.HomePageController();
 	}
 };
 
