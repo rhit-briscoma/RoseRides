@@ -34,6 +34,11 @@ rhit.HomePageController = class {
 			console.log("clicked Rider Dashboard");
 			window.location.href = "/riderDashboard.html";
 		});
+
+		document.querySelector("#menuDriverDashboard").addEventListener("click", (event) => {
+			console.log("clicked Driver Dashboard");
+			window.location.href = "/driverDashboard.html";
+		});
 	}
 }
 
@@ -134,6 +139,13 @@ rhit.initializePage = function() {
 
 	if (document.querySelector("#aboutPage")) {
 		console.log("You are on the about page");
+		const uid = urlParams.get("uid");
+
+		new rhit.HomePageController();
+	}
+
+	if (document.querySelector("#driverDashboardPage")) {
+		console.log("You are on the driver dashboard page");
 		const uid = urlParams.get("uid");
 
 		new rhit.HomePageController();
