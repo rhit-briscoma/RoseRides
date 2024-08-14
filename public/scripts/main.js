@@ -88,19 +88,8 @@ rhit.initializePage = function() {
 	if (document.querySelector("#homePage")) {
 		console.log("You are on the home page");
 		const uid = urlParams.get("uid");
-		rhit.fbMovieQuotesManager = new rhit.FbMovieQuotesManager(uid);
+
 		new rhit.ListPageController();
-	}
-
-	if (document.querySelector("#detailPage")) {
-		const movieQuoteId = urlParams.get("id");
-
-		if (!movieQuoteId) {
-			console.log("Error! Missing movie quote id!");
-			window.location.href = "/";
-		}
-		rhit.fbSingleQuoteManager = new rhit.FbSingleQuoteManager(movieQuoteId);
-		new rhit.DetailPageController();
 	}
 
 	if (document.querySelector("#loginPage")) {
