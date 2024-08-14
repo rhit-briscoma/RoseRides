@@ -78,5 +78,26 @@ body {
     border-radius: 5px;
 }
 
+#aboutPage {    
+    padding: 20px;
+    border-top: 2px solid #800000; 
+    text-align: center;
+}
+
+#aboutPage h2 {
+    font-size: 20px;
+    font-family: 'Jockey One', sans-serif;
+    color: #800000; 
+}
+
+#aboutPage p {
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 1.5;
+    font-family: 'Roboto', sans-serif;
+    color: #535353;
+}
+
+
 
   
