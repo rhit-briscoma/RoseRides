@@ -28,12 +28,13 @@ rhit.LoginPageController = class {
 rhit.FbAuthManager = class {
 	constructor() {
 		this._user = null;
-		console.log("You have made the Auth Manager");
+		// console.log("You have made the Auth Manager");
 	}
 
 	beginListening(changeListener) {
 		firebase.auth().onAuthStateChanged((user) => {
 			this._user = user;
+			console.log("User ID: ", this._user.uid);
 			changeListener();
 		});
 	}
@@ -73,7 +74,7 @@ rhit.FbAuthManager = class {
 // UPDATE THIS IF NEEDED
 rhit.checkForRedirects = function() {
 	if (document.querySelector("#loginPage") && rhit.fbAuthManager.isSignedIn){
-		window.location.href = "/list.html";
+		window.location.href = "/template.html";
 	}
 
 	if (!document.querySelector("#loginPage") && !rhit.fbAuthManager.isSignedIn){
