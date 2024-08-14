@@ -40,7 +40,7 @@ rhit.FbAuthManager = class {
 
 	signIn() {
 		console.log("Sign in using Rosefire");
-		Rosefire.signIn("f29e78aa-917f-4fe2-b904-cfbca3e39f08", (err, rfUser) => {
+		Rosefire.signIn("d9efa1c8-6769-44bd-b191-c4c2d0430837", (err, rfUser) => {
 			if (err) {
 			  console.log("Rosefire error!", err);
 			  return;
