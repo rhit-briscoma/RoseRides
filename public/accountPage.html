@@ -49,54 +49,36 @@
       </ul>
     </div>
     <main class="bmd-layout-content">
-      <div id="riderDashboardPage" class="container page-container">
-        <div class="upcoming-rides-container">
-          <h2>Upcoming Rides</h2>
-          <div class="ride-card">
+      <div id="accountPage" class="container page-container">
+
+
+        <div class="account-profile">
+          <div class="profile-header">
+            <img src="" alt="Profile Picture" class="profile-picture">
+            <h2 class="profile-name">Noah Howard</h2>
+          </div>
+        
+          <h3 class="section-title">Upcoming Bookings</h3>
+          <div class="booking">
             <div class="ride-info">
-              <div class="ride-destination">Meijer</div>
-              <div class="ride-date">Sat 7/20 | 5:00 PM</div>
+              <span class="destination">Meijer</span>
+              <span class="date-time">Sat 7/20 | 5:00 PM</span>
             </div>
             <button class="details-button">Details</button>
           </div>
-          
-          <div class="ride-card">
+        
+          <h3 class="section-title">Hosted Rides</h3>
+          <div class="booking">
             <div class="ride-info">
-              <div class="ride-destination">IND Airport</div>
-              <div class="ride-date">Sun 7/21 | 2:45 PM</div>
+              <span class="destination">Meijer</span>
+              <span class="date-time">Sat 7/21 | 5:00 PM</span>
             </div>
-            <button id="detailsButton" data-target="#rideDetailsModal" data-toggle="modal" class="details-button">Details</button>
+            <button class="details-button">Details</button>
           </div>
         </div>
-      </div>
 
-      <div class="modal fade" id="rideDetailsModal" tabindex="-1" role="dialog" aria-labelledby="rideDetailsLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="rideDetailsLabel">Ride Info</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <p><strong>Destination:</strong> <span id="rideDestination"></span></p>
-              <p><strong>Address:</strong> <span id="rideAddress"></span></p>
-              <p><strong>Depart Time & Date:</strong> <span id="rideDepartTimeDate"></span></p>
-              <p><strong>Depart Location:</strong> <span id="rideDepartLocation"></span></p>
-              <p><strong>Return Trip:</strong> <span id="rideReturnTrip"></span></p>
-              <p><strong>Return Time:</strong> <span id="rideReturnTime"></span></p>
-              <p><strong>Current Capacity:</strong> <span id="rideCurrentCapacity"></span></p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-              <button type="button" class="btn btn-danger">Book One Way</button>
-              <button type="button" class="btn btn-danger">Book Round Trip</button>
-            </div>
-          </div>
-        </div>
+        
       </div>
-
     </main>
   </div>
 

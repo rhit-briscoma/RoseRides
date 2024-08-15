@@ -7,11 +7,11 @@ body {
     color: white;
 }
 
-.rosered{
+.rosered {
     color: #800000 !important;
 }
 
-.navbar-text{
+.navbar-text {
     font-size: 32px;
 }
 
@@ -19,7 +19,7 @@ body {
     margin-top: 75px;
 }
 
-.dropdown-menu-right{
+.dropdown-menu-right {
     position: absolute;
     left: -128px;
 }
@@ -41,7 +41,7 @@ body {
     margin-right: 0.75rem;
 }
 
-.no-outline{
+.no-outline {
     border: none;
     background-color: #d9d9d9;
 }
@@ -78,17 +78,17 @@ body {
     border-radius: 5px;
 }
 
-#aboutPage {    
+#aboutPage {
     padding: 20px;
     margin-top: 100px;
-    border-top: 2px solid #800000; 
+    border-top: 2px solid #800000;
     text-align: center;
 }
 
 #aboutPage h2 {
     font-size: 40px;
     font-family: 'Jockey One', sans-serif;
-    color: #800000; 
+    color: #800000;
 }
 
 #aboutPage p {
@@ -99,7 +99,7 @@ body {
     color: #535353;
 }
 
-.list-group-item:hover{
+.list-group-item:hover {
     cursor: pointer;
 }
 
@@ -163,3 +163,109 @@ body {
     background-color: #444;
 }
   
+.floating-label-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.floating-label-group label {
+    position: absolute;
+    top: 10px !important;
+    /* left: 10px; */
+    font-size: 100%;
+    color: #999;
+    pointer-events: none;
+    transition: all 0.2s ease-out;
+}
+
+.floating-label-group input:placeholder-shown~label {
+    font-size: 100%;
+    top: 10px;
+    /* left: 12px; */
+    color: #999;
+}
+
+.floating-label-group input:not(:placeholder-shown)~label,
+.floating-label-group input:focus~label {
+    font-size: 70%;
+    top: -20px;
+    left: 8px;
+    color: #007bff;
+}
+
+.floating-label-group input:disabled~label {
+    color: #aaa;
+}
+
+.account-profile {
+    background: #f2f2f2;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 100px 0;
+  }
+  
+  .profile-header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #535353;
+  }
+  
+  .profile-picture {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin-right: 15px;
+  }
+  
+  .profile-name {
+    font-family: 'Jockey One', sans-serif;
+    font-size: 24px;
+    color: #535353;
+  }
+  
+  .section-title {
+    font-family: 'Jockey One', sans-serif;
+    font-size: 18px;
+    color: #535353;
+    margin: 20px 0 10px;
+  }
+  
+  .booking {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #e6e6e6;
+    border: 2px solid #535353;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+  
+  .ride-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .destination {
+    font-family: 'Jockey One', sans-serif;
+    font-size: 18px;
+    color: #800000;
+  }
+  
+  .date-time {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: #535353;
+  }
+  
+  .details-button {
+    background: #535353;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-family: 'Roboto', sans-serif;
+    cursor: pointer;
+  }
+

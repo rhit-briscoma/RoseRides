@@ -15,14 +15,6 @@
 </head>
 
 <body>
-  <!-- <nav class="navbar navbar-dark fixed-top">
-    <a class="navbar-brand navbar-text" href="#">RoseRides</a>
-  </nav> -->
-
-  <!-- <div id="mainPage" class="container page-container">
-
-
-  </div> -->
 
   <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
     <header class="bmd-layout-header">
@@ -34,7 +26,7 @@
         <a class="navbar-brand rosered jockey-one-regular navbar-text" href="#">&nbsp;&nbsp;RoseRides</a>
       </div>
     </header>
-    
+
     <div id="dw-p1" class="bmd-layout-drawer bg-faded">
       <header>
         <a class="navbar-brand">RoseRides</a>
@@ -44,59 +36,43 @@
         <!-- <a id="menuShowMyQuotes" class="list-group-item"><i class="material-icons">person</i>Show My Quotes</a> -->
         <a id="menuSignOut" class="list-group-item"><i class="material-icons">logout</i>Sign Out of Rose-Hulman</a>
         <a id="menuRiderDashboard" class="list-group-item"><i class="material-icons">emoji_people</i>Rider Dashboard</a>
-        <a id="menuDriverDashboard" class="list-group-item"><i class="material-icons">directions_car</i>Driver Dashboard</a>
+        <a id="menuDriverDashboard" class="list-group-item"><i class="material-icons">directions_car</i>Driver Dashboard</a>>
         <a id="menuAccountPage" class="list-group-item"><i class="material-icons">account_circle</i>Account</a>
       </ul>
     </div>
     <main class="bmd-layout-content">
-      <div id="riderDashboardPage" class="container page-container">
-        <div class="upcoming-rides-container">
-          <h2>Upcoming Rides</h2>
-          <div class="ride-card">
-            <div class="ride-info">
-              <div class="ride-destination">Meijer</div>
-              <div class="ride-date">Sat 7/20 | 5:00 PM</div>
-            </div>
-            <button class="details-button">Details</button>
+      <div id="riderRegisterPage" class="container page-container">
+        <div id="riderFormContainer">
+          <br>
+          <div class="form-group floating-label-group">
+            <label for="firstName" class="bmd-label-floating">First Name</label>
+            <input type="text" class="form-control" id="firstName">
           </div>
-          
-          <div class="ride-card">
-            <div class="ride-info">
-              <div class="ride-destination">IND Airport</div>
-              <div class="ride-date">Sun 7/21 | 2:45 PM</div>
-            </div>
-            <button id="detailsButton" data-target="#rideDetailsModal" data-toggle="modal" class="details-button">Details</button>
+
+          <div class="form-group floating-label-group">
+            <label for="lastName" class="bmd-label-floating">Last Name</label>
+            <input type="text" class="form-control" id="lastName">
+          </div>
+
+          <div class="form-group floating-label-group">
+            <label for="username" class="bmd-label-floating">Username</label>
+            <input type="text" class="form-control" id="username" disabled>
+          </div>
+
+          <div class="form-group floating-label-group">
+            <label for="roseEmail" class="bmd-label-floating">Your Rose-Hulman email address</label>
+            <input type="email" class="form-control" id="roseEmail" disabled>
+          </div>
+          <div class="form-group floating-label-group">
+            <label for="phoneNumber" class="bmd-label-floating">Phone Number</label>
+            <input type="text" class="form-control" id="phoneNumber">
+          </div>
+          <div style="text-align: center">
+            <button type="button" id="exitButton" class="btn btn-raised rosered">Exit</button>
+            <button type="button" id="signUpButton" class="btn btn-raised rosered">Sign Up</button>
           </div>
         </div>
       </div>
-
-      <div class="modal fade" id="rideDetailsModal" tabindex="-1" role="dialog" aria-labelledby="rideDetailsLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="rideDetailsLabel">Ride Info</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <p><strong>Destination:</strong> <span id="rideDestination"></span></p>
-              <p><strong>Address:</strong> <span id="rideAddress"></span></p>
-              <p><strong>Depart Time & Date:</strong> <span id="rideDepartTimeDate"></span></p>
-              <p><strong>Depart Location:</strong> <span id="rideDepartLocation"></span></p>
-              <p><strong>Return Trip:</strong> <span id="rideReturnTrip"></span></p>
-              <p><strong>Return Time:</strong> <span id="rideReturnTime"></span></p>
-              <p><strong>Current Capacity:</strong> <span id="rideCurrentCapacity"></span></p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-              <button type="button" class="btn btn-danger">Book One Way</button>
-              <button type="button" class="btn btn-danger">Book Round Trip</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </main>
   </div>
 
