@@ -111,6 +111,11 @@ rhit.HomePageController = class {
 			console.log("clicked Driver Dashboard");
 			window.location.href = "/driverDashboard.html";
 		});
+
+		document.querySelector("#menuAccountPage").addEventListener("click", (event) => {
+			console.log("clicked Account");
+			window.location.href = "/accountPage.html";
+		});
 	}
 }
 
@@ -230,6 +235,13 @@ rhit.initializePage = function() {
 		rhit.fbRiderManager = new rhit.FbRiderManager();
 		new rhit.HomePageController();
 		new rhit.RiderRegistrationPageController(rhit.fbAuthManager.uid);
+	}
+
+	if (document.querySelector("#accountPage")) {
+		console.log("You are on account page");
+		const uid = urlParams.get("uid");
+
+		new rhit.HomePageController();
 	}
 };
 

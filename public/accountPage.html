@@ -31,7 +31,7 @@
           <span class="sr-only">Toggle drawer</span>
           <i class="material-icons no-outline rosered icon-medium">menu</i>
         </button>
-        <a class="navbar-brand rosered jockey-one-regular navbar-text" href="/">&nbsp;&nbsp;RoseRides</a>
+        <a class="navbar-brand rosered jockey-one-regular navbar-text" href="#">&nbsp;&nbsp;RoseRides</a>
       </div>
     </header>
     
@@ -42,22 +42,45 @@
       <ul class="list-group">
         <a id="menuAboutUs" class="list-group-item"><i class="material-icons">info</i>About Us</a>
         <!-- <a id="menuShowMyQuotes" class="list-group-item"><i class="material-icons">person</i>Show My Quotes</a> -->
-        <a id="menuSignOut" class="list-group-item"><i class="material-icons">login</i>Sign Out of Rose-Hulman</a>
+        <a id="menuSignOut" class="list-group-item"><i class="material-icons">logout</i>Sign Out of Rose-Hulman</a>
         <a id="menuRiderDashboard" class="list-group-item"><i class="material-icons">emoji_people</i>Rider Dashboard</a>
         <a id="menuDriverDashboard" class="list-group-item"><i class="material-icons">directions_car</i>Driver Dashboard</a>
         <a id="menuAccountPage" class="list-group-item"><i class="material-icons">account_circle</i>Account</a>
       </ul>
     </div>
     <main class="bmd-layout-content">
-      <div id="aboutPage" class="container page-container">
-        <h2>Welcome to RoseRides, a student-run ride sharing platform.</h2>
-        <p>Welcome to RoseRides, the #1 ranked undergraduate engineering school ride share program for 1 year in a row! We are happy to facilitate ride sharing on Rose-Hulman's campus, allowing students to get rides where they need to go and to create rides to take other students with them.</p>
+      <div id="accountPage" class="container page-container">
+
+
+        <div class="account-profile">
+          <div class="profile-header">
+            <img src="" alt="Profile Picture" class="profile-picture">
+            <h2 class="profile-name">Noah Howard</h2>
+          </div>
+        
+          <h3 class="section-title">Upcoming Bookings</h3>
+          <div class="booking">
+            <div class="ride-info">
+              <span class="destination">Meijer</span>
+              <span class="date-time">Sat 7/20 | 5:00 PM</span>
+            </div>
+            <button class="details-button">Details</button>
+          </div>
+        
+          <h3 class="section-title">Hosted Rides</h3>
+          <div class="booking">
+            <div class="ride-info">
+              <span class="destination">Meijer</span>
+              <span class="date-time">Sat 7/21 | 5:00 PM</span>
+            </div>
+            <button class="details-button">Details</button>
+          </div>
+        </div>
+
+        
       </div>
     </main>
-
   </div>
-
-  
 
   <script src="scripts/jquery.min.js"></script>
   <script src="scripts/popper.js"></script>
