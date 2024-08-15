@@ -52,8 +52,10 @@ rhit.FbRiderManager = class {
 		this._ref.doc(docId).get().then((docSnapshot) => {
 			if (docSnapshot.exists) {
 				console.log(`Document ${docId} exists:`, docSnapshot.data());
+				return true;
 			} else {
 				console.log("No such document!");
+				return false;
 			}
 		}).catch((error) => {
 			console.log("Error checking document:", error);
