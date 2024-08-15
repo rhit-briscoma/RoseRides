@@ -205,9 +205,10 @@ rhit.FbAuthManager = class {
 rhit.checkForRedirects = function() {
 	if (document.querySelector("#loginPage") && rhit.fbAuthManager.isSignedIn){
 		if(!rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid)){ // if not, send user to rider registration
-			window.location.href = "riderRegistration.html";
+			window.location.href = "/riderRegistration.html";
+		} else {
+			window.location.href = "/riderDashboard.html";
 		}
-		window.location.href = "/riderDashboard.html";
 	}
 
 	if (!document.querySelector("#loginPage") && !rhit.fbAuthManager.isSignedIn){
