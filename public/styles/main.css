@@ -103,5 +103,63 @@ body {
     cursor: pointer;
 }
 
+.upcoming-rides-container {
+    background: #f2f2f2;
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
 
+.upcoming-rides-container h2 {
+    font-family: 'Jockey One', sans-serif;
+    font-size: 24px;
+    color: #800000;
+    margin-bottom: 20px;
+}
+
+.ride-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #d9d9d9;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border-left: 4px solid #800000;
+    border-right: 4px solid #800000;
+}
+
+.ride-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ride-destination {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    color: #333;
+}
+
+.ride-date {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    color: #666;
+}
+
+.details-button {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: white;
+    background-color: #535353;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.details-button:hover {
+    background-color: #444;
+}
   
