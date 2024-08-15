@@ -7,11 +7,11 @@ body {
     color: white;
 }
 
-.rosered{
+.rosered {
     color: #800000 !important;
 }
 
-.navbar-text{
+.navbar-text {
     font-size: 32px;
 }
 
@@ -19,7 +19,7 @@ body {
     margin-top: 75px;
 }
 
-.dropdown-menu-right{
+.dropdown-menu-right {
     position: absolute;
     left: -128px;
 }
@@ -41,7 +41,7 @@ body {
     margin-right: 0.75rem;
 }
 
-.no-outline{
+.no-outline {
     border: none;
     background-color: #d9d9d9;
 }
@@ -78,17 +78,17 @@ body {
     border-radius: 5px;
 }
 
-#aboutPage {    
+#aboutPage {
     padding: 20px;
     margin-top: 100px;
-    border-top: 2px solid #800000; 
+    border-top: 2px solid #800000;
     text-align: center;
 }
 
 #aboutPage h2 {
     font-size: 40px;
     font-family: 'Jockey One', sans-serif;
-    color: #800000; 
+    color: #800000;
 }
 
 #aboutPage p {
@@ -99,9 +99,40 @@ body {
     color: #535353;
 }
 
-.list-group-item:hover{
+.list-group-item:hover {
     cursor: pointer;
 }
 
+.floating-label-group {
+    position: relative;
+    margin-bottom: 20px;
+}
 
-  
+.floating-label-group label {
+    position: absolute;
+    top: 10px !important;
+    /* left: 10px; */
+    font-size: 100%;
+    color: #999;
+    pointer-events: none;
+    transition: all 0.2s ease-out;
+}
+
+.floating-label-group input:placeholder-shown~label {
+    font-size: 100%;
+    top: 10px;
+    left: 12px;
+    color: #999;
+}
+
+.floating-label-group input:not(:placeholder-shown)~label,
+.floating-label-group input:focus~label {
+    font-size: 70%;
+    top: -20px;
+    left: 8px;
+    color: #007bff;
+}
+
+.floating-label-group input:disabled~label {
+    color: #aaa;
+}

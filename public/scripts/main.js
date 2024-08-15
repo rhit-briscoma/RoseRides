@@ -12,10 +12,77 @@ var rhit = rhit || {};
 /** globals */
 rhit.fbAuthManager = null;
 
+/** Rider References */
+rhit.FB_COLLECTION_RIDER_ACCOUNTS = "rider_accounts";
+rhit.FB_RIDER_KEY_FIRSTNAME = "firstName";
+rhit.FB_RIDER_KEY_LASTNAME = "lastName";
+rhit.FB_RIDER_KEY_PHONENUMBER = "phoneNumber";
+rhit.FB_RIDER_KEY_ROSEEMAIL = "roseEmail";
+
+rhit.fbRiderManager = null;
+
 /** function and class syntax examples */
 rhit.functionName = function () {
 	/** function body */
 };
+
+rhit.FbRiderManager = class {
+	constructor() {
+		this._documentSnapshots = [];
+		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RIDER_ACCOUNTS);
+		this._unsubscribe = null;
+	}
+	add(username, firstName, lastName, phoneNumber, roseEmail) {
+		// console.log(`imageURL: ${imageUrl}`);
+		// console.log(`caption: ${caption}`);
+
+		this._ref.doc(username).set({
+			[rhit.FB_RIDER_KEY_FIRSTNAME]: firstName,
+			[rhit.FB_RIDER_KEY_LASTNAME]: lastName,
+			[rhit.FB_RIDER_KEY_PHONENUMBER]: phoneNumber,
+			[rhit.FB_RIDER_KEY_ROSEEMAIL]: roseEmail
+		})
+			.then((docRef) => {
+				console.log("Document written with ID: ", docRef.id);
+			})
+			.catch((error) => {
+				console.error("Error adding document: ", error);
+			});
+	}
+
+	beginListening(changeListener) {
+
+		this._unsubscribe = this._ref
+			.orderBy(rhit.FB_RIDER_KEY_LASTNAME)
+			.limit(50)
+			.onSnapshot((querySnapshot) => {
+				this._documentSnapshots = querySnapshot.docs;
+				// querySnapshot.forEach((doc) => {
+				//     console.log(doc.data);
+				// });
+				changeListener();
+			});
+
+	}
+	stopListening() {
+		this._unsubscribe();
+	}
+	get length() {
+		return this._documentSnapshots.length
+	}
+}
+
+rhit.RiderRegistrationPageController = class {
+	constructor(uid) {
+		console.log("rider registration controller. User ID: ", uid);
+		let roseEmail = uid + "@rose-hulman.edu";
+
+		document.querySelector("#username").value = uid;
+
+		document.querySelector("#roseEmail").value = roseEmail;
+
+	}
+}
 
 rhit.HomePageController = class {
 	constructor() {
@@ -149,6 +216,15 @@ rhit.initializePage = function() {
 		const uid = urlParams.get("uid");
 
 		new rhit.HomePageController();
+	}
+
+	if (document.querySelector("#riderRegisterPage")) {
+		console.log("You are on the rider registration page");
+		const uid = urlParams.get("uid");
+
+		rhit.fbRiderManager = new rhit.FbRiderManager();
+		new rhit.HomePageController();
+		new rhit.RiderRegistrationPageController(rhit.fbAuthManager.uid);
 	}
 };
 
