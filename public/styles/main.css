@@ -121,7 +121,7 @@ body {
 .floating-label-group input:placeholder-shown~label {
     font-size: 100%;
     top: 10px;
-    left: 12px;
+    /* left: 12px; */
     color: #999;
 }
 

@@ -81,6 +81,11 @@ rhit.RiderRegistrationPageController = class {
 
 		document.querySelector("#roseEmail").value = roseEmail;
 
+		document.querySelector("#exitButton").addEventListener("click", (event) => {
+			console.log("clicked Exit");
+			rhit.fbAuthManager.signOut();
+		});
+
 	}
 }
 
