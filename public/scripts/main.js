@@ -33,8 +33,6 @@ rhit.FbRiderManager = class {
 		this._unsubscribe = null;
 	}
 	add(username, firstName, lastName, phoneNumber, roseEmail) {
-		// console.log(`imageURL: ${imageUrl}`);
-		// console.log(`caption: ${caption}`);
 
 		this._ref.doc(username).set({
 			[rhit.FB_RIDER_KEY_FIRSTNAME]: firstName,
@@ -48,6 +46,18 @@ rhit.FbRiderManager = class {
 			.catch((error) => {
 				console.error("Error adding document: ", error);
 			});
+	}
+
+	docIdExists(docId){
+		this._ref.doc(docId).get().then((docSnapshot) => {
+			if (docSnapshot.exists) {
+				console.log(`Document ${docId} exists:`, docSnapshot.data());
+			} else {
+				console.log("No such document!");
+			}
+		}).catch((error) => {
+			console.log("Error checking document:", error);
+		});
 	}
 
 	beginListening(changeListener) {
@@ -73,20 +83,32 @@ rhit.FbRiderManager = class {
 }
 
 rhit.RiderRegistrationPageController = class {
+
 	constructor(uid) {
+		this.userId = uid;
+		this.roseEmail = uid + "@rose-hulman.edu";
 		console.log("rider registration controller. User ID: ", uid);
-		let roseEmail = uid + "@rose-hulman.edu";
+		// let roseEmail = uid + "@rose-hulman.edu";
 
-		document.querySelector("#username").value = uid;
+		document.querySelector("#username").value = this.userId;
 
-		document.querySelector("#roseEmail").value = roseEmail;
+		document.querySelector("#roseEmail").value = this.roseEmail;
 
 		document.querySelector("#exitButton").addEventListener("click", (event) => {
 			console.log("clicked Exit");
 			rhit.fbAuthManager.signOut();
 		});
 
+		document.querySelector("#signUpButton").addEventListener("click", (event) => {
+			console.log("clicked Sign Up");
+			let firstName = document.querySelector("#firstName");
+			let lastName = document.querySelector("#lastName");
+			let phoneNumber = document.querySelector("#phoneNumber");
+			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
+		});
+
 	}
+	
 }
 
 rhit.HomePageController = class {
@@ -180,7 +202,10 @@ rhit.FbAuthManager = class {
 // UPDATE THIS IF NEEDED
 rhit.checkForRedirects = function() {
 	if (document.querySelector("#loginPage") && rhit.fbAuthManager.isSignedIn){
-		window.location.href = "/template.html";
+		if(!rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid)){ // if not, send user to rider registration
+			window.location.href = "riderRegistration.html";
+		}
+		window.location.href = "/riderDashboard.html";
 	}
 
 	if (!document.querySelector("#loginPage") && !rhit.fbAuthManager.isSignedIn){
@@ -189,6 +214,17 @@ rhit.checkForRedirects = function() {
 
 	if (document.querySelector('#riderDashboardPage') && !rhit.fbAuthManager.isSignedIn){
 		window.location.href = "/rideList.html";
+	}
+
+	if (document.querySelector('#riderRegistrationPage') && !rhit.fbAuthManager.isSignedIn){
+		window.location.href = "/.html";
+	}
+
+	if (document.querySelector('#riderRegistrationPage') && rhit.fbAuthManager.isSignedIn){
+		if(!rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid)){ // if not, send user to rider registration
+			window.location.href = "/riderRegistration.html";
+		}
+		window.location.href = "/riderDashboard.html";
 	}
 };
 
@@ -232,7 +268,7 @@ rhit.initializePage = function() {
 		console.log("You are on the rider registration page");
 		const uid = urlParams.get("uid");
 
-		rhit.fbRiderManager = new rhit.FbRiderManager();
+		
 		new rhit.HomePageController();
 		new rhit.RiderRegistrationPageController(rhit.fbAuthManager.uid);
 	}
@@ -249,8 +285,9 @@ rhit.initializePage = function() {
 /** function and class syntax examples */
 rhit.main = function () {
 	console.log("Ready");
-
+	rhit.fbRiderManager = new rhit.FbRiderManager();
 	rhit.fbAuthManager = new rhit.FbAuthManager();
+
 	rhit.fbAuthManager.beginListening(() => {
 		console.log(`isSignedIn = ${rhit.fbAuthManager.isSignedIn}`);
 		rhit.checkForRedirects();
