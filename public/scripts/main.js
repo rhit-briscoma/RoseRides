@@ -276,12 +276,7 @@ rhit.HomePageController = class {
 
 		document.querySelector("#menuDriverDashboard").addEventListener("click", (event) => {
 			console.log("clicked Driver Dashboard");
-			let exists = isADriver(rhit.fbAuthManager.uid);
-			if (!exists) { // if not, send user to driver registration
-				window.location.href = "/driverRegistration.html";
-			} else {
-				window.location.href = "/driverDashboard.html";
-			}
+			window.location.href = "/driverRegistration.html";
 		});
 
 		document.querySelector("#menuAccountPage").addEventListener("click", (event) => {
@@ -385,6 +380,8 @@ rhit.checkForRedirects = async function () {
 		let exists = await rhit.fbDriverManager.docIdExists(rhit.fbAuthManager.uid);
 		if (!exists) { // if not, send user to driver registration
 			window.location.href = "/driverRegistration.html";
+		} else {
+			window.location.href = "/driverDashboard.html";
 		}
 	}
 };
