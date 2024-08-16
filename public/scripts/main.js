@@ -256,6 +256,12 @@ rhit.DriverRegistrationPageController = class {
 
 }
 
+rhit.riderDashboardController = class {
+	constructor() {
+		
+	}
+}
+
 rhit.HomePageController = class {
 	constructor() {
 
@@ -379,7 +385,7 @@ rhit.checkForRedirects = async function () {
 	if (document.querySelector('#driverRegisterPage') && rhit.fbAuthManager.isSignedIn) {
 		let exists = await rhit.fbDriverManager.docIdExists(rhit.fbAuthManager.uid);
 		if (!exists) { // if not, send user to driver registration
-			window.location.href = "/driverRegistration.html";
+			window.location.href = "#";
 		} else {
 			window.location.href = "/driverDashboard.html";
 		}
