@@ -11,6 +11,7 @@ var rhit = rhit || {};
 
 /** globals */
 rhit.fbAuthManager = null;
+rhit.fbRiderRequestManager = null;
 
 /** Rider References */
 rhit.FB_COLLECTION_RIDER_ACCOUNTS = "rider_accounts";
@@ -205,7 +206,6 @@ rhit.FbRiderManager = class {
 		documentRef.get().then((docSnapshot) => {
 			if (docSnapshot.exists) {
 				// Document data will be in docSnapshot.data()
-				const data = docSnapshot.data()
 				this._userFields = docSnapshot.data();
 				const data = docSnapshot.data();
 				console.log("Document data:", data);
@@ -234,9 +234,9 @@ rhit.FbRiderManager = class {
 		return this._documentSnapshots.length
 	}
 
-	get userInfo(uid){
+	// get userInfo(uid){
 
-	}
+	// }
 }
 
 rhit.RiderRegistrationPageController = class {
@@ -299,8 +299,80 @@ rhit.DriverRegistrationPageController = class {
 
 }
 
-rhit.riderDashboardController = class {
+rhit.riderRequest = class {
+	constructor(id, destination, driver, pickUpLocation, pickUpTime, price, riders) {
+		this.id = id;
+		this.destination = destination;
+		this.driver = driver;
+		this.pickUpLocation = pickUpLocation;
+		this.pickUpTime = pickUpTime;
+		this.price = price;
+		this.riders = riders;
+	}
+}
+
+rhit.FbRiderRequestManager = class {
 	constructor() {
+		this._documentSnapshots = [];
+		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RIDES);
+		this._unsubscribe = null;
+	}
+
+	add(destination, driver, pickUpLocation, pickUpTime, price, riders) {
+
+		// Add a new document with a generated id.
+		this._ref.add({
+			[rhit.FB_RIDES_KEY_DESTINATION]: destination,
+			[rhit.FB_RIDES_KEY_DRIVER]: driver,
+			[rhit.FB_RIDES_KEY_PICKUPLOCATION]: pickUpLocation,
+			[rhit.FB_RIDES_KEY_PICKUPTIME]: pickUpTime,
+			[rhit.FB_RIDES_KEY_PRICE]: price,
+			[rhit.FB_RIDES_SUBCOLLECTION]: riders
+		})
+			.then((docRef) => {
+				console.log("Document written with ID: ", docRef.id);
+			})
+			.catch((error) => {
+				console.error("Error adding document: ", error);
+			});
+	}
+
+	beginListening(changeListener) {
+		this._unsubscribe = this._ref
+			.orderBy(rhit.FB_RIDES_KEY_PICKUPTIME, "desc")
+			.limit(50)
+			.onSnapshot((querySnapshot) => {
+				console.log("Rider Request Update");
+				this._documentSnapshots = querySnapshot.docs;
+				// 	querySnapshot.forEach((doc) => {
+				// 		console.log(doc.data());
+				// });
+				changeListener();
+			});
+	}
+	stopListening() {
+		this._unsubscribe();
+	}
+	get length() {
+		return this._documentSnapshots.length;
+	}
+	getRiderRequestAtIndex(index) {
+		const docSnapshot = this._documentSnapshots[index];
+		const rq = new rhit.riderRequest(
+			docSnapshot.id,
+			docSnapshot.get(rhit.FB_RIDES_KEY_DESTINATION),
+			docSnapshot.get(rhit.FB_RIDES_KEY_DRIVER),
+			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPLOCATION),
+			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPTIME),
+			docSnapshot.get(rhit.FB_RIDES_KEY_PRICE),
+			docSnapshot.get(rhit.FB_RIDES_SUBCOLLECTION),
+		);
+		return rq;
+	}
+}
+
+rhit.riderDashboardController = class {
+	constructor () {
 		
 	}
 }
@@ -469,6 +541,7 @@ rhit.initializePage = function () {
 		const uid = urlParams.get("uid");
 
 		new rhit.HomePageController();
+		this.fbRiderRequestManager = new rhit.FbRiderRequestManager();
 	}
 
 	if (document.querySelector("#riderRegisterPage")) {
