@@ -107,6 +107,7 @@ rhit.RiderRegistrationPageController = class {
 			let lastName = document.querySelector("#lastName").value;
 			let phoneNumber = document.querySelector("#phoneNumber").value;
 			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
+			window.location.href = "/riderDashboard.html";
 		});
 
 	}
