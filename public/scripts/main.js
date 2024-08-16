@@ -40,8 +40,8 @@ rhit.FbRiderManager = class {
 			[rhit.FB_RIDER_KEY_PHONENUMBER]: phoneNumber,
 			[rhit.FB_RIDER_KEY_ROSEEMAIL]: roseEmail
 		})
-			.then((docRef) => {
-				console.log("Document written with ID: ", docRef.id);
+			.then(() => {
+				console.log("Document written");
 			})
 			.catch((error) => {
 				console.error("Error adding document: ", error);
