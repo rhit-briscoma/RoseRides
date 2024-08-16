@@ -103,9 +103,9 @@ rhit.RiderRegistrationPageController = class {
 
 		document.querySelector("#signUpButton").addEventListener("click", (event) => {
 			console.log("clicked Sign Up");
-			let firstName = document.querySelector("#firstName");
-			let lastName = document.querySelector("#lastName");
-			let phoneNumber = document.querySelector("#phoneNumber");
+			let firstName = document.querySelector("#firstName").value;
+			let lastName = document.querySelector("#lastName").value;
+			let phoneNumber = document.querySelector("#phoneNumber").value;
 			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
 		});
 
