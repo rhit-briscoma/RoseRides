@@ -48,8 +48,8 @@ rhit.FbRiderManager = class {
 			});
 	}
 
-	docIdExists(docId){
-		this._ref.doc(docId).get().then((docSnapshot) => {
+	docIdExists(docId) {
+		return this._ref.doc(docId).get().then((docSnapshot) => {
 			if (docSnapshot.exists) {
 				console.log(`Document ${docId} exists:`, docSnapshot.data());
 				return true;
@@ -59,8 +59,10 @@ rhit.FbRiderManager = class {
 			}
 		}).catch((error) => {
 			console.log("Error checking document:", error);
+			return false;  // Return false in case of error
 		});
 	}
+	
 
 	beginListening(changeListener) {
 
@@ -203,9 +205,10 @@ rhit.FbAuthManager = class {
 }
 
 // UPDATE THIS IF NEEDED
-rhit.checkForRedirects = function() {
+rhit.checkForRedirects = async function() {
 	if (document.querySelector("#loginPage") && rhit.fbAuthManager.isSignedIn){
-		if(!rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid)){ // if not, send user to rider registration
+		let exists = await rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid);
+		if(!exists){ // if not, send user to rider registration
 			window.location.href = "/riderRegistration.html";
 		} else {
 			window.location.href = "/riderDashboard.html";
