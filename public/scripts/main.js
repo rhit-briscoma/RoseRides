@@ -29,11 +29,12 @@ rhit.FB_DRIVER_KEY_SECONDARYEMAIL = "secondaryEmail";
 
 /** Rides References */
 rhit.FB_COLLECTION_RIDES = "rides";
-rhit.FB_DRIVER_KEY_FIRSTNAME = "destination";
-rhit.FB_DRIVER_KEY_LASTNAME = "driver";
-rhit.FB_DRIVER_KEY_PHONENUMBER = "pickupLocation";
-rhit.FB_DRIVER_KEY_ROSEEMAIL = "pickupTime";
-rhit.FB_DRIVER_KEY_SECONDARYEMAIL = "price";
+rhit.FB_RIDES_KEY_DESTINATION = "destination";
+rhit.FB_RIDES_KEY_DRIVER = "driver";
+rhit.FB_RIDES_KEY_PICKUPLOCATION = "pickupLocation";
+rhit.FB_RIDES_KEY_PICKUPTIME = "pickupTime";
+rhit.FB_RIDES_KEY_PRICE = "price";
+rhit.FB_RIDES_SUBCOLLECTION = "ride_riders"
 
 rhit.fbRiderManager = null;
 rhit.fbDriverManager = null;
@@ -125,12 +126,26 @@ isADriver = async function(docId){
 	return exists;
 }
 
+rhit.User = class {
+	constructor(uid, firstName, lastName, roseEmail, phoneNumber) {
+		this.uid = uid;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.roseEmail = roseEmail;
+		this.phoneNumber = phoneNumber;
+	}
+}
+
 rhit.FbRiderManager = class {
 	constructor() {
 		this._documentSnapshots = [];
 		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RIDER_ACCOUNTS);
 		this._unsubscribe = null;
 		this._userFields = [];
+		this._roseEmail = null;
+		this._firstName = null;
+		this._lastName = null;
+		this._phoneNumber = null;
 	}
 	add(username, firstName, lastName, phoneNumber, roseEmail) {
 
@@ -184,14 +199,32 @@ rhit.FbRiderManager = class {
 
 	beginListening(changeListener) {
 
-		this._unsubscribe = this._ref
-			.onSnapshot((querySnapshot) => {
-				this._documentSnapshots = querySnapshot.docs;
-				// querySnapshot.forEach((doc) => {
-				//     console.log(doc.data);
-				// });
-				changeListener();
-			});
+
+		const documentRef = this._ref.doc(rhit.fbAuthManager.uid);
+
+		documentRef.get().then((docSnapshot) => {
+			if (docSnapshot.exists) {
+				// Document data will be in docSnapshot.data()
+				const data = docSnapshot.data()
+				this._userFields = docSnapshot.data();
+				const data = docSnapshot.data();
+				console.log("Document data:", data);
+				return this._userFields;
+			} else {
+				console.log("No such document!");
+			}
+		}).catch((error) => {
+			console.error("Error getting document:", error);
+		});
+
+		// this._unsubscribe = this._ref
+		// 	.onSnapshot((querySnapshot) => {
+		// 		this._documentSnapshots = querySnapshot.docs;
+		// 		// querySnapshot.forEach((doc) => {
+		// 		//     console.log(doc.data);
+		// 		// });
+		// 		changeListener();
+		// 	});
 
 	}
 	stopListening() {
@@ -199,6 +232,10 @@ rhit.FbRiderManager = class {
 	}
 	get length() {
 		return this._documentSnapshots.length
+	}
+
+	get userInfo(uid){
+
 	}
 }
 
