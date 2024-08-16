@@ -75,7 +75,7 @@ rhit.FbDriverManager = class {
 		});
 	}
 
-	getRiderInfo(){
+	getRiderInfo() {
 
 		const documentRef = this._ref.doc(rhit.fbAuthManager.uid);
 		documentRef.get().then((docSnapshot) => {
@@ -92,7 +92,7 @@ rhit.FbDriverManager = class {
 			console.error("Error getting document:", error);
 		});
 	}
-	
+
 
 	beginListening(changeListener) {
 
@@ -112,6 +112,11 @@ rhit.FbDriverManager = class {
 	get length() {
 		return this._documentSnapshots.length
 	}
+}
+
+isADriver = async function(docId){
+	let exists = await rhit.fbDriverManager.docIdExists(rhit.fbAuthManager.uid);
+	return exists;
 }
 
 rhit.FbRiderManager = class {
@@ -152,7 +157,7 @@ rhit.FbRiderManager = class {
 		});
 	}
 
-	getRiderInfo(){
+	getRiderInfo() {
 
 		const documentRef = this._ref.doc(rhit.fbAuthManager.uid);
 		documentRef.get().then((docSnapshot) => {
@@ -169,7 +174,7 @@ rhit.FbRiderManager = class {
 			console.error("Error getting document:", error);
 		});
 	}
-	
+
 
 	beginListening(changeListener) {
 
@@ -218,7 +223,7 @@ rhit.RiderRegistrationPageController = class {
 		});
 
 	}
-	
+
 }
 
 rhit.DriverRegistrationPageController = class {
@@ -248,7 +253,7 @@ rhit.DriverRegistrationPageController = class {
 		});
 
 	}
-	
+
 }
 
 rhit.HomePageController = class {
@@ -271,6 +276,12 @@ rhit.HomePageController = class {
 
 		document.querySelector("#menuDriverDashboard").addEventListener("click", (event) => {
 			console.log("clicked Driver Dashboard");
+			let exists = isADriver(rhit.fbAuthManager.uid);
+			if (!exists) { // if not, send user to driver registration
+				window.location.href = "/driverRegistration.html";
+			} else {
+				window.location.href = "/driverDashboard.html";
+			}
 			window.location.href = "/driverDashboard.html";
 		});
 
@@ -311,26 +322,26 @@ rhit.FbAuthManager = class {
 		console.log("Sign in using Rosefire");
 		Rosefire.signIn("d9efa1c8-6769-44bd-b191-c4c2d0430837", (err, rfUser) => {
 			if (err) {
-			  console.log("Rosefire error!", err);
-			  return;
+				console.log("Rosefire error!", err);
+				return;
 			}
 			console.log("Rosefire success!", rfUser);
 
-			firebase.auth().signInWithCustomToken(rfUser.token).catch(function(error) {
+			firebase.auth().signInWithCustomToken(rfUser.token).catch(function (error) {
 				const errorCode = error.code;
 				const errorMessage = error.message;
 				if (errorCode === 'auth/invalid-custom-token') {
-				  alert('The token you provided is not valid.');
+					alert('The token you provided is not valid.');
 				} else {
-				  console.error(error);
-				  console.error("Custom auth error,", errorCode, errorMessage);
+					console.error(error);
+					console.error("Custom auth error,", errorCode, errorMessage);
 
 				}
-			  });
-			
+			});
+
 			// TODO: Use the rfUser.token with your server.
-		  });
-		  
+		});
+
 	}
 	signOut() {
 		firebase.auth().signOut();
@@ -340,48 +351,46 @@ rhit.FbAuthManager = class {
 }
 
 // UPDATE THIS IF NEEDED
-rhit.checkForRedirects = async function() {
-	if (document.querySelector("#loginPage") && rhit.fbAuthManager.isSignedIn){
+rhit.checkForRedirects = async function () {
+	if (document.querySelector("#loginPage") && rhit.fbAuthManager.isSignedIn) {
 		let exists = await rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid);
-		if(!exists){ // if not, send user to rider registration
+		if (!exists) { // if not, send user to rider registration
 			window.location.href = "/riderRegistration.html";
 		} else {
 			window.location.href = "/riderDashboard.html";
 		}
 	}
 
-	if (!document.querySelector("#loginPage") && !rhit.fbAuthManager.isSignedIn){
+	if (!document.querySelector("#loginPage") && !rhit.fbAuthManager.isSignedIn) {
 		window.location.href = "/";
 	}
 
-	if (document.querySelector('#riderRegistrationPage') && !rhit.fbAuthManager.isSignedIn){
+	if (document.querySelector('#riderRegistrationPage') && !rhit.fbAuthManager.isSignedIn) {
 		window.location.href = "/.html";
 	}
 
-	if (document.querySelector('#riderRegistrationPage') && rhit.fbAuthManager.isSignedIn){
+	if (document.querySelector('#riderRegistrationPage') && rhit.fbAuthManager.isSignedIn) {
 		let exists = await rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid);
-		if(!exists){ // if not, send user to rider registration
+		if (!exists) { // if not, send user to rider registration
 			window.location.href = "/riderRegistration.html";
 		} else {
 			window.location.href = "/riderDashboard.html";
 		}
 	}
 
-	if (document.querySelector('#driverDashboardPage') && !rhit.fbAuthManager.isSignedIn){
+	if (document.querySelector('#driverDashboardPage') && !rhit.fbAuthManager.isSignedIn) {
 		window.location.href = "/.html";
 	}
 
-	if (document.querySelector('#driverDashboardPage') && rhit.fbAuthManager.isSignedIn){
+	if (document.querySelector('#driverDashboardPage') && rhit.fbAuthManager.isSignedIn) {
 		let exists = await rhit.fbDriverManager.docIdExists(rhit.fbAuthManager.uid);
-		if(!exists){ // if not, send user to driver registration
+		if (!exists) { // if not, send user to driver registration
 			window.location.href = "/driverRegistration.html";
-		} else {
-			window.location.href = "/driverDashboard.html";
 		}
 	}
 };
 
-rhit.initializePage = function() {
+rhit.initializePage = function () {
 	const urlParams = new URLSearchParams(window.location.search);
 
 	if (document.querySelector("#homePage")) {
@@ -421,7 +430,7 @@ rhit.initializePage = function() {
 		console.log("You are on the rider registration page");
 		const uid = urlParams.get("uid");
 
-		
+
 		new rhit.HomePageController();
 		new rhit.RiderRegistrationPageController(rhit.fbAuthManager.uid);
 	}
@@ -430,7 +439,7 @@ rhit.initializePage = function() {
 		console.log("You are on the driver registration page");
 		// const uid = urlParams.get("uid");
 
-		
+
 		new rhit.HomePageController();
 		new rhit.DriverRegistrationPageController(rhit.fbAuthManager.uid);
 	}
