@@ -216,10 +216,6 @@ rhit.checkForRedirects = function() {
 		window.location.href = "/";
 	}
 
-	if (document.querySelector('#riderDashboardPage') && !rhit.fbAuthManager.isSignedIn){
-		window.location.href = "/rideList.html";
-	}
-
 	if (document.querySelector('#riderRegistrationPage') && !rhit.fbAuthManager.isSignedIn){
 		window.location.href = "/.html";
 	}
