@@ -19,18 +19,30 @@ rhit.FB_RIDER_KEY_LASTNAME = "lastName";
 rhit.FB_RIDER_KEY_PHONENUMBER = "phoneNumber";
 rhit.FB_RIDER_KEY_ROSEEMAIL = "roseEmail";
 
+/** Driver References */
+rhit.FB_COLLECTION_DRIVER_ACCOUNTS = "driver_accounts";
+rhit.FB_DRIVER_KEY_FIRSTNAME = "firstName";
+rhit.FB_DRIVER_KEY_LASTNAME = "lastName";
+rhit.FB_DRIVER_KEY_PHONENUMBER = "phoneNumber";
+rhit.FB_DRIVER_KEY_ROSEEMAIL = "roseEmail";
+rhit.FB_DRIVER_KEY_SECONDARYEMAIL = "secondaryEmail";
+
+/** References for Riders and Drivers */
+
 rhit.fbRiderManager = null;
+rhit.fbDriverManager = null;
 
 /** function and class syntax examples */
 rhit.functionName = function () {
 	/** function body */
 };
 
-rhit.FbRiderManager = class {
+rhit.FbDriverManager = class {
 	constructor() {
 		this._documentSnapshots = [];
-		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RIDER_ACCOUNTS);
+		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_DRIVER_ACCOUNTS);
 		this._unsubscribe = null;
+		this._userFields = [];
 	}
 	add(username, firstName, lastName, phoneNumber, roseEmail) {
 
@@ -62,13 +74,106 @@ rhit.FbRiderManager = class {
 			return false;  // Return false in case of error
 		});
 	}
+
+	getRiderInfo(){
+
+		const documentRef = this._ref.doc(rhit.fbAuthManager.uid);
+		documentRef.get().then((docSnapshot) => {
+			if (docSnapshot.exists) {
+				// Document data will be in docSnapshot.data()
+				this._userFields = docSnapshot.data();
+				const data = docSnapshot.data();
+				console.log("Document data:", data);
+				return this._userFields;
+			} else {
+				console.log("No such document!");
+			}
+		}).catch((error) => {
+			console.error("Error getting document:", error);
+		});
+	}
 	
 
 	beginListening(changeListener) {
 
 		this._unsubscribe = this._ref
-			.orderBy(rhit.FB_RIDER_KEY_LASTNAME)
-			.limit(50)
+			.onSnapshot((querySnapshot) => {
+				this._documentSnapshots = querySnapshot.docs;
+				// querySnapshot.forEach((doc) => {
+				//     console.log(doc.data);
+				// });
+				changeListener();
+			});
+
+	}
+	stopListening() {
+		this._unsubscribe();
+	}
+	get length() {
+		return this._documentSnapshots.length
+	}
+}
+
+rhit.FbRiderManager = class {
+	constructor() {
+		this._documentSnapshots = [];
+		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RIDER_ACCOUNTS);
+		this._unsubscribe = null;
+		this._userFields = [];
+	}
+	add(username, firstName, lastName, phoneNumber, roseEmail) {
+
+		this._ref.doc(username).set({
+			[rhit.FB_RIDER_KEY_FIRSTNAME]: firstName,
+			[rhit.FB_RIDER_KEY_LASTNAME]: lastName,
+			[rhit.FB_RIDER_KEY_PHONENUMBER]: phoneNumber,
+			[rhit.FB_RIDER_KEY_ROSEEMAIL]: roseEmail
+		})
+			.then(() => {
+				console.log("Document written");
+			})
+			.catch((error) => {
+				console.error("Error adding document: ", error);
+			});
+	}
+
+	docIdExists(docId) {
+		return this._ref.doc(docId).get().then((docSnapshot) => {
+			if (docSnapshot.exists) {
+				console.log(`Document ${docId} exists:`, docSnapshot.data());
+				return true;
+			} else {
+				console.log("No such document!");
+				return false;
+			}
+		}).catch((error) => {
+			console.log("Error checking document:", error);
+			return false;  // Return false in case of error
+		});
+	}
+
+	getRiderInfo(){
+
+		const documentRef = this._ref.doc(rhit.fbAuthManager.uid);
+		documentRef.get().then((docSnapshot) => {
+			if (docSnapshot.exists) {
+				// Document data will be in docSnapshot.data()
+				this._userFields = docSnapshot.data();
+				const data = docSnapshot.data();
+				console.log("Document data:", data);
+				return this._userFields;
+			} else {
+				console.log("No such document!");
+			}
+		}).catch((error) => {
+			console.error("Error getting document:", error);
+		});
+	}
+	
+
+	beginListening(changeListener) {
+
+		this._unsubscribe = this._ref
 			.onSnapshot((querySnapshot) => {
 				this._documentSnapshots = querySnapshot.docs;
 				// querySnapshot.forEach((doc) => {
@@ -101,6 +206,36 @@ rhit.RiderRegistrationPageController = class {
 		document.querySelector("#exitButton").addEventListener("click", (event) => {
 			console.log("clicked Exit");
 			rhit.fbAuthManager.signOut();
+		});
+
+		document.querySelector("#signUpButton").addEventListener("click", (event) => {
+			console.log("clicked Sign Up");
+			let firstName = document.querySelector("#firstName").value;
+			let lastName = document.querySelector("#lastName").value;
+			let phoneNumber = document.querySelector("#phoneNumber").value;
+			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
+			window.location.href = "/riderDashboard.html";
+		});
+
+	}
+	
+}
+
+rhit.DriverRegistrationPageController = class {
+
+	constructor(uid) {
+		this.userId = uid;
+		this.roseEmail = uid + "@rose-hulman.edu";
+		console.log("driver registration controller. User ID: ", uid);
+		// let roseEmail = uid + "@rose-hulman.edu";
+
+		document.querySelector("#username").value = this.userId;
+
+		document.querySelector("#roseEmail").value = this.roseEmail;
+
+		document.querySelector("#exitButton").addEventListener("click", (event) => {
+			console.log("clicked Exit");
+			window.history.back();
 		});
 
 		document.querySelector("#signUpButton").addEventListener("click", (event) => {
@@ -224,10 +359,24 @@ rhit.checkForRedirects = async function() {
 	}
 
 	if (document.querySelector('#riderRegistrationPage') && rhit.fbAuthManager.isSignedIn){
-		if(!rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid)){ // if not, send user to rider registration
+		let exists = await rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid);
+		if(!exists){ // if not, send user to rider registration
 			window.location.href = "/riderRegistration.html";
 		} else {
 			window.location.href = "/riderDashboard.html";
+		}
+	}
+
+	if (document.querySelector('#driverDashboardPage') && !rhit.fbAuthManager.isSignedIn){
+		window.location.href = "/.html";
+	}
+
+	if (document.querySelector('#driverDashboardPage') && rhit.fbAuthManager.isSignedIn){
+		let exists = await rhit.fbDriverManager.docIdExists(rhit.fbAuthManager.uid);
+		if(!exists){ // if not, send user to driver registration
+			window.location.href = "/driverRegistration.html";
+		} else {
+			window.location.href = "/driverDashboard.html";
 		}
 	}
 };
@@ -277,6 +426,15 @@ rhit.initializePage = function() {
 		new rhit.RiderRegistrationPageController(rhit.fbAuthManager.uid);
 	}
 
+	if (document.querySelector("#driverRegisterPage")) {
+		console.log("You are on the driver registration page");
+		// const uid = urlParams.get("uid");
+
+		
+		new rhit.HomePageController();
+		new rhit.DriverRegistrationPageController(rhit.fbAuthManager.uid);
+	}
+
 	if (document.querySelector("#accountPage")) {
 		console.log("You are on account page");
 		const uid = urlParams.get("uid");
@@ -290,6 +448,7 @@ rhit.initializePage = function() {
 rhit.main = function () {
 	console.log("Ready");
 	rhit.fbRiderManager = new rhit.FbRiderManager();
+	rhit.fbDriverManager = new rhit.FbDriverManager();
 	rhit.fbAuthManager = new rhit.FbAuthManager();
 
 	rhit.fbAuthManager.beginListening(() => {

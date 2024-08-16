@@ -23,7 +23,7 @@
           <span class="sr-only">Toggle drawer</span>
           <i class="material-icons no-outline rosered icon-medium">menu</i>
         </button>
-        <a class="navbar-brand rosered jockey-one-regular navbar-text" href="#">&nbsp;&nbsp;RoseRides</a>
+        <a class="navbar-brand rosered jockey-one-regular navbar-text" href="/riderDashboard.html">&nbsp;&nbsp;RoseRides</a>
       </div>
     </header>
 
@@ -41,17 +41,17 @@
       </ul>
     </div>
     <main class="bmd-layout-content">
-      <div id="riderRegisterPage" class="container page-container">
+      <div id="driverRegisterPage" class="container page-container">
         <div id="riderFormContainer">
           <br>
           <div class="form-group floating-label-group">
             <label for="firstName" class="bmd-label-floating">First Name</label>
-            <input type="text" class="form-control" id="firstName">
+            <input type="text" class="form-control" id="firstName" disabled>
           </div>
 
           <div class="form-group floating-label-group">
             <label for="lastName" class="bmd-label-floating">Last Name</label>
-            <input type="text" class="form-control" id="lastName">
+            <input type="text" class="form-control" id="lastName" disabled>
           </div>
 
           <div class="form-group floating-label-group">
@@ -65,8 +65,35 @@
           </div>
           <div class="form-group floating-label-group">
             <label for="phoneNumber" class="bmd-label-floating">Phone Number</label>
-            <input type="text" class="form-control" id="phoneNumber">
+            <input type="text" class="form-control" id="phoneNumber" disabled>
           </div>
+
+          <h3 class="rosered jockey-one-regular" style="text-align: center;">Enter your car information</h3><br>
+
+          <div class="form-group floating-label-group">
+            <label for="firstName" class="bmd-label-floating">Make</label>
+            <input type="text" class="form-control" id="make" >
+          </div>
+
+          <div class="form-group floating-label-group">
+            <label for="lastName" class="bmd-label-floating">Model</label>
+            <input type="text" class="form-control" id="model" >
+          </div>
+
+          <div class="form-group floating-label-group">
+            <label for="username" class="bmd-label-floating">Year</label>
+            <input type="text" class="form-control" id="year" >
+          </div>
+
+          <div class="form-group floating-label-group">
+            <label for="roseEmail" class="bmd-label-floating">Color</label>
+            <input type="email" class="form-control" id="color" >
+          </div>
+          <div class="form-group floating-label-group">
+            <label for="phoneNumber" class="bmd-label-floating">License Plate</label>
+            <input type="text" class="form-control" id="licensePlate">
+          </div>
+
           <div style="text-align: center">
             <button type="button" id="exitButton" class="btn btn-raised rosered">Exit</button>
             <button type="button" id="signUpButton" class="btn btn-raised rosered">Sign Up</button>
