@@ -223,8 +223,9 @@ rhit.checkForRedirects = function() {
 	if (document.querySelector('#riderRegistrationPage') && rhit.fbAuthManager.isSignedIn){
 		if(!rhit.fbRiderManager.docIdExists(rhit.fbAuthManager.uid)){ // if not, send user to rider registration
 			window.location.href = "/riderRegistration.html";
+		} else {
+			window.location.href = "/riderDashboard.html";
 		}
-		window.location.href = "/riderDashboard.html";
 	}
 };
 
