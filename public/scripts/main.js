@@ -282,7 +282,6 @@ rhit.HomePageController = class {
 			} else {
 				window.location.href = "/driverDashboard.html";
 			}
-			window.location.href = "/driverDashboard.html";
 		});
 
 		document.querySelector("#menuAccountPage").addEventListener("click", (event) => {
