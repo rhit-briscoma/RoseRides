@@ -376,12 +376,12 @@ rhit.checkForRedirects = async function () {
 		window.location.href = "/.html";
 	}
 
-	if (document.querySelector('#driverDashboardPage') && rhit.fbAuthManager.isSignedIn) {
+	if (document.querySelector('#driverRegisterPage') && rhit.fbAuthManager.isSignedIn) {
 		let exists = await rhit.fbDriverManager.docIdExists(rhit.fbAuthManager.uid);
 		if (!exists) { // if not, send user to driver registration
-			window.location.href = "/driverDashboard.html";
-		} else {
 			window.location.href = "/driverRegistration.html";
+		} else {
+			window.location.href = "/driverDashboard.html";
 		}
 	}
 };
