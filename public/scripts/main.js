@@ -27,7 +27,13 @@ rhit.FB_DRIVER_KEY_PHONENUMBER = "phoneNumber";
 rhit.FB_DRIVER_KEY_ROSEEMAIL = "roseEmail";
 rhit.FB_DRIVER_KEY_SECONDARYEMAIL = "secondaryEmail";
 
-/** References for Riders and Drivers */
+/** Rides References */
+rhit.FB_COLLECTION_RIDES = "rides";
+rhit.FB_DRIVER_KEY_FIRSTNAME = "destination";
+rhit.FB_DRIVER_KEY_LASTNAME = "driver";
+rhit.FB_DRIVER_KEY_PHONENUMBER = "pickupLocation";
+rhit.FB_DRIVER_KEY_ROSEEMAIL = "pickupTime";
+rhit.FB_DRIVER_KEY_SECONDARYEMAIL = "price";
 
 rhit.fbRiderManager = null;
 rhit.fbDriverManager = null;
