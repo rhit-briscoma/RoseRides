@@ -39,11 +39,14 @@ rhit.FB_RIDES_SUBCOLLECTION = "ride_riders"
 
 rhit.fbRiderManager = null;
 rhit.fbDriverManager = null;
+rhit.fbRideListManager = null;
 
-/** function and class syntax examples */
-rhit.functionName = function () {
-	/** function body */
-};
+function htmlToElement(html) {
+	var template = document.createElement('template');
+	html = html.trim();
+	template.innerHTML = html;
+	return template.content.firstChild;
+}
 
 rhit.FbDriverManager = class {
 	constructor() {
@@ -311,6 +314,66 @@ rhit.riderRequest = class {
 	}
 }
 
+rhit.FbRideListManager = class {
+	constructor() {
+		this._documentSnapshots = [];
+		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RIDES);
+		this._unsubscribe = null;
+	}
+
+	add(destination, driver, pickUpLocation, pickUpTime, price, riders) {
+
+		// Add a new document with a generated id.
+		this._ref.add({
+			[rhit.FB_RIDES_KEY_DESTINATION]: destination,
+			[rhit.FB_RIDES_KEY_DRIVER]: driver,
+			[rhit.FB_RIDES_KEY_PICKUPLOCATION]: pickUpLocation,
+			[rhit.FB_RIDES_KEY_PICKUPTIME]: pickUpTime,
+			[rhit.FB_RIDES_KEY_PRICE]: price,
+			[rhit.FB_RIDES_SUBCOLLECTION]: riders
+		})
+			.then((docRef) => {
+				console.log("Document written with ID: ", docRef.id);
+			})
+			.catch((error) => {
+				console.error("Error adding document: ", error);
+			});
+	}
+
+	beginListening(changeListener) {
+		this._unsubscribe = this._ref
+			.orderBy(rhit.FB_RIDES_KEY_PICKUPTIME, "desc")
+			.limit(50)
+			.onSnapshot((querySnapshot) => {
+				console.log("Ride List Update");
+				this._documentSnapshots = querySnapshot.docs;
+				// 	querySnapshot.forEach((doc) => {
+				// 		console.log(doc.data());
+				// });
+				changeListener();
+			});
+	}
+	stopListening() {
+		this._unsubscribe();
+	}
+	get length() {
+		return this._documentSnapshots.length;
+	}
+	getRideAtIndex(index) {
+		const docSnapshot = this._documentSnapshots[index];
+		const rq = new rhit.riderRequest(
+			docSnapshot.id,
+			docSnapshot.get(rhit.FB_RIDES_KEY_DESTINATION),
+			docSnapshot.get(rhit.FB_RIDES_KEY_DRIVER),
+			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPLOCATION),
+			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPTIME),
+			docSnapshot.get(rhit.FB_RIDES_KEY_PRICE),
+			docSnapshot.get(rhit.FB_RIDES_SUBCOLLECTION),
+		);
+		return rq;
+	}
+}
+
 rhit.FbRiderRequestManager = class {
 	constructor() {
 		this._documentSnapshots = [];
@@ -465,6 +528,50 @@ rhit.FbAuthManager = class {
 	get isSignedIn() { return !!this._user; }
 }
 
+rhit.RiderDashboardController = class {
+	constructor() {
+		rhit.fbRideListManager.beginListening(this.updateList.bind(this));
+	}
+	
+
+	updateList() {
+		console.log("I need to update the liusat on the page!");
+		console.log(rhit.fbRideListManager.length);
+		console.log(rhit.fbRideListManager.getRideAtIndex(0));
+
+		const newList = htmlToElement('<div class="upcoming-rides-container"></div>');
+		for (let i = 0; i < rhit.fbRideListManager.length; i++) {
+			const rq = rhit.fbRideListManager.getRideAtIndex(i);
+			const newCard = this._createCard(rq);
+
+			newCard.onclick = (event) => {
+				window.location.href = `/ride.html?id=${rq.id}`;
+			}
+
+			newList.appendChild(newCard);
+		}
+		const oldList = document.querySelector("#upcomingRidesContainer");
+		oldList.removeAttribute("id");
+		oldList.hidden = true;
+		oldList.parentElement.appendChild(newList);
+	}
+
+	_createCard(ride) {
+		const pickUpTime = ride.pickUpTime.toDate();
+		const formattedTime = pickUpTime.toLocaleString('en-US', {
+			month: 'long', day: 'numeric', year: 'numeric', 
+			hour: 'numeric', minute: 'numeric', 
+			hour12: true
+		});
+		return htmlToElement(`<div class="card">
+            <div class="card-body">
+              <h5 class="card-title">${ride.destination}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">${formattedTime}</h6>
+            </div>
+          </div>`);
+	}
+}
+
 // UPDATE THIS IF NEEDED
 rhit.checkForRedirects = async function () {
 	if (document.querySelector("#loginPage") && rhit.fbAuthManager.isSignedIn) {
@@ -527,6 +634,7 @@ rhit.initializePage = function () {
 		const uid = urlParams.get("uid");
 
 		new rhit.HomePageController();
+		new rhit.RiderDashboardController();
 	}
 
 	if (document.querySelector("#aboutPage")) {
@@ -577,6 +685,7 @@ rhit.main = function () {
 	rhit.fbRiderManager = new rhit.FbRiderManager();
 	rhit.fbDriverManager = new rhit.FbDriverManager();
 	rhit.fbAuthManager = new rhit.FbAuthManager();
+	rhit.fbRideListManager = new rhit.FbRideListManager();
 
 	rhit.fbAuthManager.beginListening(() => {
 		console.log(`isSignedIn = ${rhit.fbAuthManager.isSignedIn}`);

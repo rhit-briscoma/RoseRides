@@ -51,19 +51,9 @@
     <main class="bmd-layout-content">
       <div id="riderDashboardPage" class="container page-container">
 
-        <div class="upcoming-rides-container">
-          
-          <div class="ride-card">
-            <div class="ride-info">
-              <div class="ride-destination">IND Airport</div>
-              <div class="ride-date">Sun 7/21 | 2:45 PM</div>
-            </div>
-            <button id="detailsButton" data-target="#rideDetailsModal" data-toggle="modal" class="details-button">Details</button>
-          </div>
+        <div id="upcomingRidesContainer" class="upcoming-rides-container"></div>
 
-        </div>
-
-        <div class="modal fade" id="rideDetailsModal" tabindex="-1" role="dialog" aria-labelledby="rideDetailsLabel" aria-hidden="true">
+        <!-- <div class="modal fade" id="rideDetailsModal" tabindex="-1" role="dialog" aria-labelledby="rideDetailsLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -82,13 +72,13 @@
                 <p><strong>Current Capacity:</strong> <span id="rideCurrentCapacity"></span></p>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-                <button type="button" class="btn btn-danger">Book One Way</button>
-                <button type="button" class="btn btn-danger">Book Round Trip</button>
+                <button id="backButton" type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
+                <button id="bookOneWayButton" type="button" class="btn btn-danger">Book One Way</button>
+                <button id="bookRoundTripButton" type="button" class="btn btn-danger">Book Round Trip</button>
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
         
       </div>
 
