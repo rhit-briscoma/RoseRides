@@ -40,6 +40,7 @@ rhit.FB_RIDES_SUBCOLLECTION = "ride_riders"
 rhit.fbRiderManager = null;
 rhit.fbDriverManager = null;
 rhit.fbRideListManager = null;
+rhit.fbRideDetailManager = null;
 
 function htmlToElement(html) {
 	var template = document.createElement('template');
@@ -572,6 +573,98 @@ rhit.RiderDashboardController = class {
 	}
 }
 
+rhit.RidePageController = class {
+	constructor() {
+		document.querySelector("#cancelBookingButton").addEventListener("click", (event) => {
+			window.location.href = "/riderDashboard.html"
+		});
+		document.querySelector("#bookButton").addEventListener("click", (event) => {
+			rhit.fbRideDetailManager.addRider(rhit.fbAuthManager.uid);
+		});
+
+		rhit.fbRideDetailManager.beginListening(this.updateView.bind(this));
+	}
+	updateView() {
+		document.querySelector("#destinationField").innerHTML = rhit.fbRideDetailManager.destination;
+		document.querySelector("#driverField").innerHTML += rhit.fbRideDetailManager.driver;
+		document.querySelector("#pickupLocationField").innerHTML += rhit.fbRideDetailManager.pickupLocation;
+		document.querySelector("#pickupTimeField").innerHTML += rhit.fbRideDetailManager.pickupTime;
+		document.querySelector("#priceField").innerHTML += rhit.fbRideDetailManager.price;
+		rhit.fbRideDetailManager.riderCount.then((count) => {
+			document.querySelector("#numberRidersField").innerHTML += count;
+		}).catch((error) => {
+			console.error("Error getting rider count:", error);
+		});
+	}
+}
+
+rhit.FbRideDetailManager = class {
+	constructor(rideId) {
+		this._documentSnapshots = {};
+		this._unsubscribe = null;
+		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RIDES).doc(rideId);
+	}
+	beginListening(changeListener) {
+		this._unsubscribe = this._ref.onSnapshot((doc) => {
+			if (doc.exists) {
+				console.log("Document data: ", doc.data());
+				this._documentSnapshot = doc;
+				changeListener();
+			} else {
+				console.log("No such document!");
+			}
+		});
+	}
+	stopListening() {
+		this._unsubscribe();
+	}
+
+	addRider(riderId) {
+		const ridersRef = this._documentSnapshot.ref.collection(rhit.FB_RIDES_SUBCOLLECTION);
+		
+		ridersRef.doc(riderId).set({})
+		.then(() => {
+			console.log("Rider added with ID: ", riderId);
+			alert(`Booking for ${riderId} confirmed!`)
+			window.location.href = "/accountPage.html"
+		})
+		.catch(error => {
+			console.error("Error adding rider: ", error);
+		});
+	}
+
+	get destination() {
+		return this._documentSnapshot.get(rhit.FB_RIDES_KEY_DESTINATION);
+	}
+	get driver() {
+		return this._documentSnapshot.get(rhit.FB_RIDES_KEY_DRIVER);
+	}
+	get pickupLocation() {
+		return this._documentSnapshot.get(rhit.FB_RIDES_KEY_PICKUPLOCATION);
+	}
+	get pickupTime() {
+		const pickUpTime = this._documentSnapshot.get(rhit.FB_RIDES_KEY_PICKUPTIME).toDate();
+		const formattedTime = pickUpTime.toLocaleString('en-US', {
+			month: 'long', day: 'numeric', year: 'numeric', 
+			hour: 'numeric', minute: 'numeric', 
+			hour12: true
+		});
+		return formattedTime;
+	}
+	get price() {
+		return "$" + this._documentSnapshot.get(rhit.FB_RIDES_KEY_PRICE);
+	}
+	get riderCount() {
+		const ridersRef = this._documentSnapshot.ref.collection(rhit.FB_RIDES_SUBCOLLECTION);
+		return ridersRef.get().then(querySnapshot => {
+			return querySnapshot.size;
+		}).catch(error => {
+			console.error("Error getting riders count: ", error);
+			return;
+		});
+	}
+}
+
 // UPDATE THIS IF NEEDED
 rhit.checkForRedirects = async function () {
 	if (document.querySelector("#loginPage") && rhit.fbAuthManager.isSignedIn) {
@@ -676,16 +769,35 @@ rhit.initializePage = function () {
 
 		new rhit.HomePageController();
 	}
+
+	if (document.querySelector("#ridePage")) {
+		new rhit.HomePageController();
+	}
 };
 
 /* Main */
 /** function and class syntax examples */
 rhit.main = function () {
+
+	if (document.querySelector("#ridePage")) {
+		const queryString = window.location.search;
+		console.log(queryString);
+		const urlParams = new URLSearchParams(queryString);
+		const rideId = urlParams.get("id");
+		if (!rideId) {
+			window.location.href = "/riderDashboard.html";
+		}
+
+		rhit.fbRideDetailManager = new rhit.FbRideDetailManager(rideId);
+		new rhit.RidePageController();
+	}
+
 	console.log("Ready");
 	rhit.fbRiderManager = new rhit.FbRiderManager();
 	rhit.fbDriverManager = new rhit.FbDriverManager();
 	rhit.fbAuthManager = new rhit.FbAuthManager();
 	rhit.fbRideListManager = new rhit.FbRideListManager();
+
 
 	rhit.fbAuthManager.beginListening(() => {
 		console.log(`isSignedIn = ${rhit.fbAuthManager.isSignedIn}`);

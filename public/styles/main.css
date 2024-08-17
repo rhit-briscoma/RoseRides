@@ -271,13 +271,39 @@ body {
   }
 
 .card {
-    margin: 10px 0;
+    margin: 10px 0px;
 }
 
-#listPage .card-title,
-#listPage .card-subtitle {
+#ridePage .card-title,
+#ridePage .card-subtitle {
     white-space: nowrap;
     overflow: hidden;
     display: block;
     text-overflow: ellipsis;
+}
+
+#ridePage .card-title {
+    font-size: 45px;
+    font-weight: bold;
+}
+
+#ridePage .card-subtitle {
+    font-weight: normal;
+    font-size: 35px;
+}
+
+#cancelBookingButton,
+#bookButton {
+    font-size: 24px;
+    color: white;
+    background: #800000;
+}
+
+#cancelBookingButton:hover,
+#bookButton:hover {
+    font-size: 24px;
+    color: #e0e0e0;
+    background: #720000;
+    transform: scale(1.05);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
