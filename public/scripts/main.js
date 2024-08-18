@@ -298,7 +298,7 @@ rhit.RiderRegistrationPageController = class {
 			let lastName = document.querySelector("#lastName").value;
 			let phoneNumber = document.querySelector("#phoneNumber").value;
 			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
-			window.location.href = "/riderDashboard.html";
+			window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager.uid}`;
 		});
 
 	}
@@ -397,7 +397,7 @@ rhit.FbRideListManager = class {
 	beginListening(changeListener) {
 		let query = this._ref.orderBy(rhit.FB_RIDES_KEY_PICKUPTIME, "desc").limit(50)
 		if (this._uid) {
-			query = query.where(rhit.FB_RIDES, "==", this._uid);
+			query = query.where(rhit.FB_RIDES_RIDER, "==", this._uid);
 		}
 
 		this._unsubscribe = query
@@ -425,7 +425,7 @@ rhit.FbRideListManager = class {
 			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPLOCATION),
 			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPTIME),
 			docSnapshot.get(rhit.FB_RIDES_KEY_PRICE),
-			docSnapshot.get(rhit.FB_RIDES_SUBCOLLECTION),
+			docSnapshot.get(rhit.FB_RIDES_RIDER),
 		);
 		return rq;
 	}
@@ -488,6 +488,9 @@ rhit.FbRiderRequestManager = class {
 			docSnapshot.get(rhit.FB_RIDES_SUBCOLLECTION),
 		);
 		return rq;
+	}
+	delete() {
+		return this._ref.delete();
 	}
 }
 
@@ -579,7 +582,7 @@ rhit.HomePageController = class {
 
 		document.querySelector("#menuRiderDashboard").addEventListener("click", (event) => {
 			console.log("clicked Rider Dashboard");
-			window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager}`;
+			window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager.uid}`;
 		});
 
 		document.querySelector("#menuDriverDashboard").addEventListener("click", (event) => {
@@ -728,10 +731,10 @@ rhit.RiderDashboardController = class {
 rhit.RidePageController = class {
 	constructor() {
 		document.querySelector("#cancelBookingButton").addEventListener("click", (event) => {
-			window.location.href = "/riderDashboard.html"
-		});
-		document.querySelector("#bookButton").addEventListener("click", (event) => {
-			rhit.fbRideDetailManager.addRider(rhit.fbAuthManager.uid);
+			rhit.fbRideDetailManager.delete().then(() => {
+				console.log("Document successfully deleted!")
+				window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager.uid}`
+			})
 		});
 
 		rhit.fbRideDetailManager.beginListening(this.updateView.bind(this));
@@ -742,11 +745,7 @@ rhit.RidePageController = class {
 		document.querySelector("#pickupLocationField").innerHTML += rhit.fbRideDetailManager.pickupLocation;
 		document.querySelector("#pickupTimeField").innerHTML += rhit.fbRideDetailManager.pickupTime;
 		document.querySelector("#priceField").innerHTML += rhit.fbRideDetailManager.price;
-		rhit.fbRideDetailManager.riderCount.then((count) => {
-			document.querySelector("#numberRidersField").innerHTML += count;
-		}).catch((error) => {
-			console.error("Error getting rider count:", error);
-		});
+		document.querySelector("#riderField").innerHTML += rhit.fbRideDetailManager.rider;
 	}
 }
 
@@ -785,6 +784,10 @@ rhit.FbRideDetailManager = class {
 			});
 	}
 
+	delete() {
+		return this._ref.delete();
+	}
+
 	get destination() {
 		return this._documentSnapshot.get(rhit.FB_RIDES_KEY_DESTINATION);
 	}
@@ -806,14 +809,8 @@ rhit.FbRideDetailManager = class {
 	get price() {
 		return "$" + this._documentSnapshot.get(rhit.FB_RIDES_KEY_PRICE);
 	}
-	get riderCount() {
-		const ridersRef = this._documentSnapshot.ref.collection(rhit.FB_RIDES_SUBCOLLECTION);
-		return ridersRef.get().then(querySnapshot => {
-			return querySnapshot.size;
-		}).catch(error => {
-			console.error("Error getting riders count: ", error);
-			return;
-		});
+	get rider() {
+		return this._documentSnapshot.get(rhit.FB_RIDES_RIDER);
 	}
 }
 
@@ -824,7 +821,7 @@ rhit.checkForRedirects = async function () {
 		if (!exists) { // if not, send user to rider registration
 			window.location.href = "/riderRegistration.html";
 		} else {
-			window.location.href = "/riderDashboard.html";
+			window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager.uid}`;
 		}
 	}
 
@@ -841,7 +838,7 @@ rhit.checkForRedirects = async function () {
 		if (!exists) { // if not, send user to rider registration
 			window.location.href = "/riderRegistration.html";
 		} else {
-			window.location.href = "/riderDashboard.html";
+			window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager.uid}`;
 		}
 	}
 
@@ -939,7 +936,7 @@ rhit.main = function () {
 		const urlParams = new URLSearchParams(queryString);
 		const rideId = urlParams.get("id");
 		if (!rideId) {
-			window.location.href = "/riderDashboard.html";
+			window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager.uid}`;
 		}
 
 		rhit.fbRideDetailManager = new rhit.FbRideDetailManager(rideId);

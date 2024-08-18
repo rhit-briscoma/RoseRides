@@ -292,15 +292,14 @@ body {
     font-size: 35px;
 }
 
-#cancelBookingButton,
-#bookButton {
+#cancelBookingButton {
+    margin: 20px;
     font-size: 24px;
     color: white;
     background: #800000;
 }
 
-#cancelBookingButton:hover,
-#bookButton:hover {
+#cancelBookingButton:hover {
     font-size: 24px;
     color: #e0e0e0;
     background: #720000;
