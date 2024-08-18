@@ -26,7 +26,7 @@ rhit.FB_DRIVER_KEY_FIRSTNAME = "firstName";
 rhit.FB_DRIVER_KEY_LASTNAME = "lastName";
 rhit.FB_DRIVER_KEY_PHONENUMBER = "phoneNumber";
 rhit.FB_DRIVER_KEY_ROSEEMAIL = "roseEmail";
-rhit.FB_DRIVER_KEY_SECONDARYEMAIL = "secondaryEmail";
+rhit.FB_DRIVER_SUBCOLLECTION = "car";
 
 /** Rides References */
 rhit.FB_COLLECTION_RIDES = "rides";
@@ -56,7 +56,7 @@ rhit.FbDriverManager = class {
 		this._unsubscribe = null;
 		this._userFields = [];
 	}
-	add(username, firstName, lastName, phoneNumber, roseEmail) {
+	add(username, firstName, lastName, phoneNumber, roseEmail, carDetails) {
 
 		this._ref.doc(username).set({
 			[rhit.FB_RIDER_KEY_FIRSTNAME]: firstName,
@@ -65,6 +65,7 @@ rhit.FbDriverManager = class {
 			[rhit.FB_RIDER_KEY_ROSEEMAIL]: roseEmail
 		})
 			.then(() => {
+				this.addCarToDriver(carDetails);
 				console.log("Document written");
 			})
 			.catch((error) => {
@@ -87,7 +88,7 @@ rhit.FbDriverManager = class {
 		});
 	}
 
-	getRiderInfo() {
+	getDriverInfo() {
 
 		const documentRef = this._ref.doc(rhit.fbAuthManager.uid);
 		documentRef.get().then((docSnapshot) => {
@@ -121,12 +122,31 @@ rhit.FbDriverManager = class {
 	stopListening() {
 		this._unsubscribe();
 	}
+
+	async addCarToDriver(carDetails) {
+		try {
+			const driverRef = this._ref.doc(rhit.fbAuthManager.uid);
+
+			await driverRef.collection('cars').add({
+                make: carDetails.make,
+                model: carDetails.model,
+                year: carDetails.year,
+                color: carDetails.color,
+                licensePlate: carDetails.licensePlate
+            });
+
+			console.log('Car added successfully!');
+		} catch (error) {
+			console.error("Error adding car: ", error);
+		}
+	}
+
 	get length() {
 		return this._documentSnapshots.length
 	}
 }
 
-isADriver = async function(docId){
+isADriver = async function (docId) {
 	let exists = await rhit.fbDriverManager.docIdExists(rhit.fbAuthManager.uid);
 	return exists;
 }
@@ -138,6 +158,16 @@ rhit.User = class {
 		this.lastName = lastName;
 		this.roseEmail = roseEmail;
 		this.phoneNumber = phoneNumber;
+	}
+}
+
+rhit.carDetails = class {
+	constructor (make, modal, year, color, licensePlate) {
+		this.make = make;
+		this.modal = modal;
+		this.year = year;
+		this.color = color;
+		this.licensePlate = licensePlate;
 	}
 }
 
@@ -184,9 +214,8 @@ rhit.FbRiderManager = class {
 	}
 
 	getRiderInfo() {
-
 		const documentRef = this._ref.doc(rhit.fbAuthManager.uid);
-		documentRef.get().then((docSnapshot) => {
+		return documentRef.get().then((docSnapshot) => {
 			if (docSnapshot.exists) {
 				// Document data will be in docSnapshot.data()
 				this._userFields = docSnapshot.data();
@@ -195,9 +224,11 @@ rhit.FbRiderManager = class {
 				return this._userFields;
 			} else {
 				console.log("No such document!");
+				return null; // Explicitly return null if the document doesn't exist
 			}
 		}).catch((error) => {
 			console.error("Error getting document:", error);
+			throw error; // Rethrow the error so it can be caught in the calling function
 		});
 	}
 
@@ -265,7 +296,13 @@ rhit.RiderRegistrationPageController = class {
 			let firstName = document.querySelector("#firstName").value;
 			let lastName = document.querySelector("#lastName").value;
 			let phoneNumber = document.querySelector("#phoneNumber").value;
-			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
+			let make = document.querySelector("#make").value;
+			let modal = document.querySelector("#modal").value;
+			let year = document.querySelector("#year").value;
+			let color = document.querySelector("#color").value;
+			let licensePlate = document.querySelector("#licensePlate").value;
+			let carDetails = new carDetails(make, modal, year, color, licensePlate);
+			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail, carDetails);
 			window.location.href = "/riderDashboard.html";
 		});
 
@@ -279,11 +316,11 @@ rhit.DriverRegistrationPageController = class {
 		this.userId = uid;
 		this.roseEmail = uid + "@rose-hulman.edu";
 		console.log("driver registration controller. User ID: ", uid);
-		// let roseEmail = uid + "@rose-hulman.edu";
-
+		const riderInfo = this.createDriverProfile();
 		document.querySelector("#username").value = this.userId;
-
 		document.querySelector("#roseEmail").value = this.roseEmail;
+
+
 
 		document.querySelector("#exitButton").addEventListener("click", (event) => {
 			console.log("clicked Exit");
@@ -295,11 +332,26 @@ rhit.DriverRegistrationPageController = class {
 			let firstName = document.querySelector("#firstName").value;
 			let lastName = document.querySelector("#lastName").value;
 			let phoneNumber = document.querySelector("#phoneNumber").value;
-			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
-			window.location.href = "/riderDashboard.html";
+			rhit.fbDriverManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
+			window.location.href = "/driverDashboard.html";
 		});
-
 	}
+
+	async createDriverProfile() {
+		try {
+			const riderData = await rhit.fbRiderManager.getRiderInfo()
+			if (riderData) {
+				document.querySelector("#firstName").value = riderData.firstName;
+        		document.querySelector("#lastName").value = riderData.lastName;
+        		document.querySelector("#phoneNumber").value = riderData.phoneNumber;
+				return;
+			}
+	
+		} catch (error) {
+			console.error('Error creating driver profile:', error);
+		}
+	}
+
 
 }
 
@@ -436,8 +488,8 @@ rhit.FbRiderRequestManager = class {
 }
 
 rhit.riderDashboardController = class {
-	constructor () {
-		
+	constructor() {
+
 	}
 }
 
@@ -533,7 +585,7 @@ rhit.RiderDashboardController = class {
 	constructor() {
 		rhit.fbRideListManager.beginListening(this.updateList.bind(this));
 	}
-	
+
 
 	updateList() {
 		console.log("I need to update the liusat on the page!");
@@ -560,8 +612,8 @@ rhit.RiderDashboardController = class {
 	_createCard(ride) {
 		const pickUpTime = ride.pickUpTime.toDate();
 		const formattedTime = pickUpTime.toLocaleString('en-US', {
-			month: 'long', day: 'numeric', year: 'numeric', 
-			hour: 'numeric', minute: 'numeric', 
+			month: 'long', day: 'numeric', year: 'numeric',
+			hour: 'numeric', minute: 'numeric',
 			hour12: true
 		});
 		return htmlToElement(`<div class="card">
@@ -621,16 +673,16 @@ rhit.FbRideDetailManager = class {
 
 	addRider(riderId) {
 		const ridersRef = this._documentSnapshot.ref.collection(rhit.FB_RIDES_SUBCOLLECTION);
-		
+
 		ridersRef.doc(riderId).set({})
-		.then(() => {
-			console.log("Rider added with ID: ", riderId);
-			alert(`Booking for ${riderId} confirmed!`)
-			window.location.href = "/accountPage.html"
-		})
-		.catch(error => {
-			console.error("Error adding rider: ", error);
-		});
+			.then(() => {
+				console.log("Rider added with ID: ", riderId);
+				alert(`Booking for ${riderId} confirmed!`)
+				window.location.href = "/accountPage.html"
+			})
+			.catch(error => {
+				console.error("Error adding rider: ", error);
+			});
 	}
 
 	get destination() {
@@ -645,8 +697,8 @@ rhit.FbRideDetailManager = class {
 	get pickupTime() {
 		const pickUpTime = this._documentSnapshot.get(rhit.FB_RIDES_KEY_PICKUPTIME).toDate();
 		const formattedTime = pickUpTime.toLocaleString('en-US', {
-			month: 'long', day: 'numeric', year: 'numeric', 
-			hour: 'numeric', minute: 'numeric', 
+			month: 'long', day: 'numeric', year: 'numeric',
+			hour: 'numeric', minute: 'numeric',
 			hour12: true
 		});
 		return formattedTime;
