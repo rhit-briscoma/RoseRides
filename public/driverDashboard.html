@@ -31,7 +31,7 @@
           <span class="sr-only">Toggle drawer</span>
           <i class="material-icons no-outline rosered icon-medium">menu</i>
         </button>
-        <a class="navbar-brand rosered jockey-one-regular navbar-text" href="/driverDashboard.html">&nbsp;&nbsp;RoseRides</a>
+        <a class="navbar-brand rosered jockey-one-regular navbar-text" href="/riderDashboard.html">&nbsp;&nbsp;RoseRides</a>
       </div>
     </header>
     
@@ -50,22 +50,12 @@
     </div>
     <main class="bmd-layout-content">
       <div id="driverDashboardPage" class="container page-container">
-        
-        <div class="account-profile">
-          <div class="profile-header">
-            <h2 class="profile-name">Requested Rides</h2>
-          </div>
-        
-          <div class="booking">
-            <div class="ride-info">
-              <span class="destination">Meijer</span>
-              <span class="date-time">Sat 7/20 | 5:00 PM</span>
-            </div>
-            <button class="details-button">Details</button>
-          </div>  
+
+        <div id="requestedRidesContainer" class="upcoming-rides-container"></div>
 
       </div>
     </main>
+
   </div>
 
   <script src="scripts/jquery.min.js"></script>

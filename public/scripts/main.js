@@ -35,7 +35,7 @@ rhit.FB_RIDES_KEY_DRIVER = "driver";
 rhit.FB_RIDES_KEY_PICKUPLOCATION = "pickupLocation";
 rhit.FB_RIDES_KEY_PICKUPTIME = "pickupTime";
 rhit.FB_RIDES_KEY_PRICE = "price";
-rhit.FB_RIDES_SUBCOLLECTION = "ride_riders"
+rhit.FB_RIDES_RIDER = "rider"
 
 rhit.fbRiderManager = null;
 rhit.fbDriverManager = null;
@@ -65,7 +65,7 @@ rhit.FbDriverManager = class {
 			[rhit.FB_RIDER_KEY_ROSEEMAIL]: roseEmail
 		})
 			.then(() => {
-				this.addCarToDriver(carDetails);
+				this.addCarToDriver(username, carDetails);
 				console.log("Document written");
 			})
 			.catch((error) => {
@@ -123,11 +123,11 @@ rhit.FbDriverManager = class {
 		this._unsubscribe();
 	}
 
-	async addCarToDriver(carDetails) {
+	async addCarToDriver(username, carDetails) {
 		try {
-			const driverRef = this._ref.doc(rhit.fbAuthManager.uid);
+			const driverRef = this._ref.doc(username);
 
-			await driverRef.collection('cars').add({
+			await driverRef.collection('cars').doc(carDetails.licensePlate).set({
                 make: carDetails.make,
                 model: carDetails.model,
                 year: carDetails.year,
@@ -136,6 +136,7 @@ rhit.FbDriverManager = class {
             });
 
 			console.log('Car added successfully!');
+			window.location.href = "/driverDashboard.html";
 		} catch (error) {
 			console.error("Error adding car: ", error);
 		}
@@ -161,10 +162,10 @@ rhit.User = class {
 	}
 }
 
-rhit.carDetails = class {
-	constructor (make, modal, year, color, licensePlate) {
+rhit.CarDetails = class {
+	constructor (make, model, year, color, licensePlate) {
 		this.make = make;
-		this.modal = modal;
+		this.model = model;
 		this.year = year;
 		this.color = color;
 		this.licensePlate = licensePlate;
@@ -296,13 +297,7 @@ rhit.RiderRegistrationPageController = class {
 			let firstName = document.querySelector("#firstName").value;
 			let lastName = document.querySelector("#lastName").value;
 			let phoneNumber = document.querySelector("#phoneNumber").value;
-			let make = document.querySelector("#make").value;
-			let modal = document.querySelector("#modal").value;
-			let year = document.querySelector("#year").value;
-			let color = document.querySelector("#color").value;
-			let licensePlate = document.querySelector("#licensePlate").value;
-			let carDetails = new carDetails(make, modal, year, color, licensePlate);
-			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail, carDetails);
+			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
 			window.location.href = "/riderDashboard.html";
 		});
 
@@ -316,7 +311,7 @@ rhit.DriverRegistrationPageController = class {
 		this.userId = uid;
 		this.roseEmail = uid + "@rose-hulman.edu";
 		console.log("driver registration controller. User ID: ", uid);
-		const riderInfo = this.createDriverProfile();
+		const riderInfo = this.createDriverDetails();
 		document.querySelector("#username").value = this.userId;
 		document.querySelector("#roseEmail").value = this.roseEmail;
 
@@ -332,12 +327,17 @@ rhit.DriverRegistrationPageController = class {
 			let firstName = document.querySelector("#firstName").value;
 			let lastName = document.querySelector("#lastName").value;
 			let phoneNumber = document.querySelector("#phoneNumber").value;
-			rhit.fbDriverManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
-			window.location.href = "/driverDashboard.html";
+			let model = document.querySelector("#model").value;
+			let make = document.querySelector("#make").value;
+			let year = document.querySelector("#year").value;
+			let color = document.querySelector("#color").value;
+			let licensePlate = document.querySelector("#licensePlate").value;
+			let carDetails = new rhit.CarDetails(make, model, year, color, licensePlate);
+			rhit.fbDriverManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail, carDetails);
 		});
 	}
 
-	async createDriverProfile() {
+	async createDriverDetails() {
 		try {
 			const riderData = await rhit.fbRiderManager.getRiderInfo()
 			if (riderData) {
@@ -368,22 +368,23 @@ rhit.riderRequest = class {
 }
 
 rhit.FbRideListManager = class {
-	constructor() {
+	constructor(uid) {
+		this._uid = uid;
 		this._documentSnapshots = [];
 		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RIDES);
 		this._unsubscribe = null;
 	}
 
-	add(destination, driver, pickUpLocation, pickUpTime, price, riders) {
+	add(destination, driver, pickUpLocation, pickUpDateTime, price) {
 
 		// Add a new document with a generated id.
 		this._ref.add({
 			[rhit.FB_RIDES_KEY_DESTINATION]: destination,
 			[rhit.FB_RIDES_KEY_DRIVER]: driver,
 			[rhit.FB_RIDES_KEY_PICKUPLOCATION]: pickUpLocation,
-			[rhit.FB_RIDES_KEY_PICKUPTIME]: pickUpTime,
+			[rhit.FB_RIDES_KEY_PICKUPTIME]: firebase.firestore.Timestamp.fromDate(new Date(pickUpDateTime)),
 			[rhit.FB_RIDES_KEY_PRICE]: price,
-			[rhit.FB_RIDES_SUBCOLLECTION]: riders
+			[rhit.FB_RIDES_RIDER]: this._uid
 		})
 			.then((docRef) => {
 				console.log("Document written with ID: ", docRef.id);
@@ -394,9 +395,12 @@ rhit.FbRideListManager = class {
 	}
 
 	beginListening(changeListener) {
-		this._unsubscribe = this._ref
-			.orderBy(rhit.FB_RIDES_KEY_PICKUPTIME, "desc")
-			.limit(50)
+		let query = this._ref.orderBy(rhit.FB_RIDES_KEY_PICKUPTIME, "desc").limit(50)
+		if (this._uid) {
+			query = query.where(rhit.FB_RIDES, "==", this._uid);
+		}
+
+		this._unsubscribe = query
 			.onSnapshot((querySnapshot) => {
 				console.log("Ride List Update");
 				this._documentSnapshots = querySnapshot.docs;
@@ -487,9 +491,76 @@ rhit.FbRiderRequestManager = class {
 	}
 }
 
-rhit.riderDashboardController = class {
+rhit.DriverDashboardController = class {
 	constructor() {
+		document.querySelector("#submitAddRide").addEventListener("click", async (event) => {
+			const destination = document.querySelector("#inputDestination").value;
+			const pickUpLocation = document.querySelector("#inputPickUpLocation").value;
+			const pickUpDate = document.querySelector("#inputPickUpDate").value;
+			const pickUpTime = document.querySelector("#inputPickUpTime").value;
+			const pickUpDateTime = this.convertToDatetimeLocal(pickUpDate, pickUpTime);
+			rhit.fbRideListManager.add(destination, "", pickUpLocation, pickUpDateTime, 0)
+			this.updateList();
+		});
 
+		$("#addDriveDialog").on("show.bs.modal", (event) => {
+			// Pre-animation
+			document.querySelector("#inputDestination").value = "";
+			document.querySelector("#inputPickUpLocation").value = "";
+			document.querySelector("#inputPickUpDate").value = "";
+			document.querySelector("#inputPickUpTime").value = "";
+		});
+		$("#addDriveDialog").on("shown.bs.modal", (event) => {
+			// Post-animation
+			document.querySelector("#inputDestination").focus();
+		});
+
+		// Start Listening!
+		rhit.fbRideListManager.beginListening(this.updateList.bind(this));
+		this.updateList();
+	}
+
+	convertToDatetimeLocal(pickUpDate, pickUpTime) {
+		return pickUpDate.replace(/\s+/g, '') + "T" + pickUpTime.replace(/\s+/g, '');
+	}
+
+	updateList() {
+		console.log("I need to update the list on the page!");
+		console.log(rhit.fbRideListManager.length);
+		console.log(rhit.fbRideListManager.getRideAtIndex(0));
+
+		const newList = htmlToElement('<div class="upcoming-rides-container"></div>');
+		for (let i = 0; i < rhit.fbRideListManager.length; i++) {
+			const rq = rhit.fbRideListManager.getRideAtIndex(i);
+			const newCard = this._createCard(rq);
+
+			newCard.onclick = (event) => {
+				window.location.href = `/ride.html?id=${rq.id}`;
+			}
+
+			newList.appendChild(newCard);
+		}
+		const oldList = document.querySelector("#upcomingRidesContainer");
+		if (oldList) {
+			oldList.removeAttribute("id");
+			oldList.hidden = true;
+			oldList.parentElement.appendChild(newList);
+		}
+	}
+
+	_createCard(ride) {
+		const pickUpTime = ride.pickUpTime.toDate();
+		const formattedTime = pickUpTime.toLocaleString('en-US', {
+			month: 'long', day: 'numeric', year: 'numeric',
+			hour: 'numeric', minute: 'numeric',
+			hour12: true
+		});
+		return htmlToElement(`<div class="card">
+            <div class="card-body">
+              <h5 class="card-title">${ride.destination}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">${formattedTime}</h6>
+            </div>
+          </div>`);
 	}
 }
 
@@ -508,7 +579,7 @@ rhit.HomePageController = class {
 
 		document.querySelector("#menuRiderDashboard").addEventListener("click", (event) => {
 			console.log("clicked Rider Dashboard");
-			window.location.href = "/riderDashboard.html";
+			window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager}`;
 		});
 
 		document.querySelector("#menuDriverDashboard").addEventListener("click", (event) => {
@@ -583,12 +654,39 @@ rhit.FbAuthManager = class {
 
 rhit.RiderDashboardController = class {
 	constructor() {
+		document.querySelector("#submitAddRide").addEventListener("click", async (event) => {
+			const destination = document.querySelector("#inputDestination").value;
+			const pickUpLocation = document.querySelector("#inputPickUpLocation").value;
+			const pickUpDate = document.querySelector("#inputPickUpDate").value;
+			const pickUpTime = document.querySelector("#inputPickUpTime").value;
+			const pickUpDateTime = this.convertToDatetimeLocal(pickUpDate, pickUpTime);
+			rhit.fbRideListManager.add(destination, "", pickUpLocation, pickUpDateTime, 0)
+			this.updateList();
+		});
+
+		$("#addDriveDialog").on("show.bs.modal", (event) => {
+			// Pre-animation
+			document.querySelector("#inputDestination").value = "";
+			document.querySelector("#inputPickUpLocation").value = "";
+			document.querySelector("#inputPickUpDate").value = "";
+			document.querySelector("#inputPickUpTime").value = "";
+		});
+		$("#addDriveDialog").on("shown.bs.modal", (event) => {
+			// Post-animation
+			document.querySelector("#inputDestination").focus();
+		});
+
+		// Start Listening!
 		rhit.fbRideListManager.beginListening(this.updateList.bind(this));
+		this.updateList();
 	}
 
+	convertToDatetimeLocal(pickUpDate, pickUpTime) {
+		return pickUpDate.replace(/\s+/g, '') + "T" + pickUpTime.replace(/\s+/g, '');
+	}
 
 	updateList() {
-		console.log("I need to update the liusat on the page!");
+		console.log("I need to update the list on the page!");
 		console.log(rhit.fbRideListManager.length);
 		console.log(rhit.fbRideListManager.getRideAtIndex(0));
 
@@ -604,9 +702,11 @@ rhit.RiderDashboardController = class {
 			newList.appendChild(newCard);
 		}
 		const oldList = document.querySelector("#upcomingRidesContainer");
-		oldList.removeAttribute("id");
-		oldList.hidden = true;
-		oldList.parentElement.appendChild(newList);
+		if (oldList) {
+			oldList.removeAttribute("id");
+			oldList.hidden = true;
+			oldList.parentElement.appendChild(newList);
+		}
 	}
 
 	_createCard(ride) {
@@ -778,6 +878,7 @@ rhit.initializePage = function () {
 		console.log("You are on the rider dashboard page");
 		const uid = urlParams.get("uid");
 
+		rhit.fbRideListManager = new rhit.FbRideListManager(uid);
 		new rhit.HomePageController();
 		new rhit.RiderDashboardController();
 	}
@@ -794,6 +895,7 @@ rhit.initializePage = function () {
 		const uid = urlParams.get("uid");
 
 		new rhit.HomePageController();
+		new rhit.DriverDashboardController();
 		this.fbRiderRequestManager = new rhit.FbRiderRequestManager();
 	}
 
@@ -848,7 +950,7 @@ rhit.main = function () {
 	rhit.fbRiderManager = new rhit.FbRiderManager();
 	rhit.fbDriverManager = new rhit.FbDriverManager();
 	rhit.fbAuthManager = new rhit.FbAuthManager();
-	rhit.fbRideListManager = new rhit.FbRideListManager();
+
 
 
 	rhit.fbAuthManager.beginListening(() => {

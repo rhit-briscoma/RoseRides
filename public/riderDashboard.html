@@ -53,36 +53,48 @@
 
         <div id="upcomingRidesContainer" class="upcoming-rides-container"></div>
 
-        <!-- <div class="modal fade" id="rideDetailsModal" tabindex="-1" role="dialog" aria-labelledby="rideDetailsLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="rideDetailsLabel">Ride Info</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <p><strong>Destination:</strong> <span id="rideDestination"></span></p>
-                <p><strong>Address:</strong> <span id="rideAddress"></span></p>
-                <p><strong>Depart Time & Date:</strong> <span id="rideDepartTimeDate"></span></p>
-                <p><strong>Depart Location:</strong> <span id="rideDepartLocation"></span></p>
-                <p><strong>Return Trip:</strong> <span id="rideReturnTrip"></span></p>
-                <p><strong>Return Time:</strong> <span id="rideReturnTime"></span></p>
-                <p><strong>Current Capacity:</strong> <span id="rideCurrentCapacity"></span></p>
-              </div>
-              <div class="modal-footer">
-                <button id="backButton" type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-                <button id="bookOneWayButton" type="button" class="btn btn-danger">Book One Way</button>
-                <button id="bookRoundTripButton" type="button" class="btn btn-danger">Book Round Trip</button>
-              </div>
+        <button id="fab" class="btn bmd-btn-fab" data-toggle="modal" data-target="#addDriveDialog">
+          <i class="material-icons">add</i>
+        </button>
+      </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="addDriveDialog" tabindex="-1" role="dialog" aria-labelledby="Add quote dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Ride</h5>
+          </div>
+          <div class="modal-body">
+            <div class="form-group bmd-form-group"> 
+              <label for="inputDestination" class="bmd-label-floating">Desired Destination</label>
+              <input type="text" class="form-control" id="inputDestination">
+            </div>
+            <div class="form-group bmd-form-group"> 
+              <label for="inputPickUpLocation" class="bmd-label-floating">Pick Up Location</label>
+              <input type="text" class="form-control" id="inputPickUpLocation">
+            </div>
+            <div class="form-group bmd-form-group"> 
+              <label for="inputPickUpDate" class="bmd-label-floating">Pick Up Date</label>
+              <input type="text" class="form-control" id="inputPickUpDate">
+              <span class="bmd-help">PLEASE USE FORMAT OF YYYY-MM-DD</span>
+            </div>
+            <div class="form-group bmd-form-group"> 
+              <label for="inputPickUpTime" class="bmd-label-floating">Pick Up Time</label>
+              <input type="text" class="form-control" id="inputPickUpTime">
+              <span class="bmd-help">PLEASE USE FORMAT OF HH:MM</span>
             </div>
           </div>
-        </div> -->
-        
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">CANCEL</button>
+            <button id="submitAddRide" type="button" class="btn" data-dismiss="modal">CREATE</button>
+          </div>
+        </div>
       </div>
+    </div>
+  </div>
 
-    </main>
   </div>
 
   <script src="scripts/jquery.min.js"></script>
