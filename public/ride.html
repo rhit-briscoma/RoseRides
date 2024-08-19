@@ -56,15 +56,51 @@
             <h6 id="driverField" class="card-subtitle mb-2 text-muted"><strong>driver:</stong> </h6>
             <h6 id="pickupLocationField" class="card-subtitle mb-2 text-muted"><strong>Pick Up:</strong> </h6>
             <h6 id="pickupTimeField" class="card-subtitle mb-2 text-muted"><strong>Pick Up Time:</strong> </h6>
-            <h6 id="priceField" class="card-subtitle mb-2 text-muted"><strong>Price:</strong> </h6>
             <h6 id="riderField" class="card-subtitle mb-2 text-muted"><strong>Rider:</strong> </h6>
           </div>
         </div>
         <div class="d-flex justify-content-between">
           <button id="cancelBookingButton" type="button" class="btn btn-primary">Cancel booking</button>
+          <button id="editBookingButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#editBookingDialog" >Edit Booking</button>
         </div>
       </div>
     </main>
+
+      <!-- Modal -->
+      <div class="modal fade" id="editBookingDialog" tabindex="-1" role="dialog" aria-labelledby="Add quote dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add Ride</h5>
+            </div>
+            <div class="modal-body">
+              <div class="form-group bmd-form-group"> 
+                <label for="inputDestination">Desired Destination</label>
+                <input type="text" class="form-control" id="inputDestination">
+              </div>
+              <div class="form-group bmd-form-group"> 
+                <label for="inputPickUpLocation">Pick Up Location</label>
+                <input type="text" class="form-control" id="inputPickUpLocation">
+              </div>
+              <div class="form-group bmd-form-group"> 
+                <label for="inputPickUpDate" class="bmd-label-floating">Pick Up Date</label>
+                <input type="text" class="form-control" id="inputPickUpDate">
+                <span class="bmd-help">PLEASE USE FORMAT OF YYYY-MM-DD</span>
+              </div>
+              <div class="form-group bmd-form-group"> 
+                <label for="inputPickUpTime" class="bmd-label-floating">Pick Up Time</label>
+                <input type="text" class="form-control" id="inputPickUpTime">
+                <span class="bmd-help">PLEASE USE FORMAT OF HH:MM</span>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">CANCEL</button>
+              <button id="submitEditBooking" type="button" class="btn" data-dismiss="modal">CONFIRM</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
   </div>
 
   <script src="scripts/jquery.min.js"></script>

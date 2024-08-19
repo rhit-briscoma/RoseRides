@@ -12,6 +12,7 @@ var rhit = rhit || {};
 /** globals */
 rhit.fbAuthManager = null;
 rhit.fbRiderRequestManager = null;
+rhit.fbAccountListManager = null;
 
 /** Rider References */
 rhit.FB_COLLECTION_RIDER_ACCOUNTS = "rider_accounts";
@@ -34,7 +35,6 @@ rhit.FB_RIDES_KEY_DESTINATION = "destination";
 rhit.FB_RIDES_KEY_DRIVER = "driver";
 rhit.FB_RIDES_KEY_PICKUPLOCATION = "pickupLocation";
 rhit.FB_RIDES_KEY_PICKUPTIME = "pickupTime";
-rhit.FB_RIDES_KEY_PRICE = "price";
 rhit.FB_RIDES_RIDER = "rider"
 
 rhit.fbRiderManager = null;
@@ -136,7 +136,7 @@ rhit.FbDriverManager = class {
             });
 
 			console.log('Car added successfully!');
-			window.location.href = "/driverDashboard.html";
+			window.location.href = `/driverDashboard.html?uid=${rhit.fbAuthManager.uid}`;
 		} catch (error) {
 			console.error("Error adding car: ", error);
 		}
@@ -192,6 +192,7 @@ rhit.FbRiderManager = class {
 			[rhit.FB_RIDER_KEY_ROSEEMAIL]: roseEmail
 		})
 			.then(() => {
+				window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager.uid}`
 				console.log("Document written");
 			})
 			.catch((error) => {
@@ -297,8 +298,7 @@ rhit.RiderRegistrationPageController = class {
 			let firstName = document.querySelector("#firstName").value;
 			let lastName = document.querySelector("#lastName").value;
 			let phoneNumber = document.querySelector("#phoneNumber").value;
-			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);
-			window.location.href = `/riderDashboard.html?uid=${rhit.fbAuthManager.uid}`;
+			rhit.fbRiderManager.add(this.userId, firstName, lastName, phoneNumber, this.roseEmail);;
 		});
 
 	}
@@ -356,13 +356,12 @@ rhit.DriverRegistrationPageController = class {
 }
 
 rhit.riderRequest = class {
-	constructor(id, destination, driver, pickUpLocation, pickUpTime, price, riders) {
+	constructor(id, destination, driver, pickUpLocation, pickUpTime, riders) {
 		this.id = id;
 		this.destination = destination;
 		this.driver = driver;
 		this.pickUpLocation = pickUpLocation;
 		this.pickUpTime = pickUpTime;
-		this.price = price;
 		this.riders = riders;
 	}
 }
@@ -375,7 +374,7 @@ rhit.FbRideListManager = class {
 		this._unsubscribe = null;
 	}
 
-	add(destination, driver, pickUpLocation, pickUpDateTime, price) {
+	add(destination, driver, pickUpLocation, pickUpDateTime) {
 
 		// Add a new document with a generated id.
 		this._ref.add({
@@ -383,7 +382,6 @@ rhit.FbRideListManager = class {
 			[rhit.FB_RIDES_KEY_DRIVER]: driver,
 			[rhit.FB_RIDES_KEY_PICKUPLOCATION]: pickUpLocation,
 			[rhit.FB_RIDES_KEY_PICKUPTIME]: firebase.firestore.Timestamp.fromDate(new Date(pickUpDateTime)),
-			[rhit.FB_RIDES_KEY_PRICE]: price,
 			[rhit.FB_RIDES_RIDER]: this._uid
 		})
 			.then((docRef) => {
@@ -394,10 +392,17 @@ rhit.FbRideListManager = class {
 			});
 	}
 
+
 	beginListening(changeListener) {
 		let query = this._ref.orderBy(rhit.FB_RIDES_KEY_PICKUPTIME, "desc").limit(50)
 		if (this._uid) {
-			query = query.where(rhit.FB_RIDES_RIDER, "==", this._uid);
+			if (document.querySelector("#driverDashboardPage")) {
+				query = query.where(rhit.FB_RIDES_KEY_DRIVER, "==", "");
+			} else if (document.querySelector("#riderDashboardPage")) {
+				query = query.where(rhit.FB_RIDES_RIDER, "==", this._uid);
+			} else {
+				query = null;
+			}
 		}
 
 		this._unsubscribe = query
@@ -424,7 +429,68 @@ rhit.FbRideListManager = class {
 			docSnapshot.get(rhit.FB_RIDES_KEY_DRIVER),
 			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPLOCATION),
 			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPTIME),
-			docSnapshot.get(rhit.FB_RIDES_KEY_PRICE),
+			docSnapshot.get(rhit.FB_RIDES_RIDER),
+		);
+		return rq;
+	}
+}
+
+rhit.FbAccountListManager = class {
+	constructor(uid) {
+		this._uid = uid;
+		this._documentSnapshots = [];
+		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RIDES);
+		this._unsubscribe = null;
+	}
+
+	add(destination, driver, pickUpLocation, pickUpDateTime) {
+
+		// Add a new document with a generated id.
+		this._ref.add({
+			[rhit.FB_RIDES_KEY_DESTINATION]: destination,
+			[rhit.FB_RIDES_KEY_DRIVER]: driver,
+			[rhit.FB_RIDES_KEY_PICKUPLOCATION]: pickUpLocation,
+			[rhit.FB_RIDES_KEY_PICKUPTIME]: firebase.firestore.Timestamp.fromDate(new Date(pickUpDateTime)),
+			[rhit.FB_RIDES_RIDER]: this._uid
+		})
+			.then((docRef) => {
+				console.log("Document written with ID: ", docRef.id);
+			})
+			.catch((error) => {
+				console.error("Error adding document: ", error);
+			});
+	}
+
+	beginListening(changeListener) {
+		let query = this._ref.orderBy(rhit.FB_RIDES_KEY_PICKUPTIME, "desc").limit(50)
+		if (this._uid) {
+			query = query.where(rhit.FB_RIDES_KEY_DRIVER, "==", this._uid);
+		}
+
+		this._unsubscribe = query
+			.onSnapshot((querySnapshot) => {
+				console.log("Ride List Update");
+				this._documentSnapshots = querySnapshot.docs;
+				// 	querySnapshot.forEach((doc) => {
+				// 		console.log(doc.data());
+				// });
+				changeListener();
+			});
+	}
+	stopListening() {
+		this._unsubscribe();
+	}
+	get length() {
+		return this._documentSnapshots.length;
+	}
+	getRideAtIndex(index) {
+		const docSnapshot = this._documentSnapshots[index];
+		const rq = new rhit.riderRequest(
+			docSnapshot.id,
+			docSnapshot.get(rhit.FB_RIDES_KEY_DESTINATION),
+			docSnapshot.get(rhit.FB_RIDES_KEY_DRIVER),
+			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPLOCATION),
+			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPTIME),
 			docSnapshot.get(rhit.FB_RIDES_RIDER),
 		);
 		return rq;
@@ -438,7 +504,7 @@ rhit.FbRiderRequestManager = class {
 		this._unsubscribe = null;
 	}
 
-	add(destination, driver, pickUpLocation, pickUpTime, price, riders) {
+	add(destination, driver, pickUpLocation, pickUpTime, riders) {
 
 		// Add a new document with a generated id.
 		this._ref.add({
@@ -446,7 +512,6 @@ rhit.FbRiderRequestManager = class {
 			[rhit.FB_RIDES_KEY_DRIVER]: driver,
 			[rhit.FB_RIDES_KEY_PICKUPLOCATION]: pickUpLocation,
 			[rhit.FB_RIDES_KEY_PICKUPTIME]: pickUpTime,
-			[rhit.FB_RIDES_KEY_PRICE]: price,
 			[rhit.FB_RIDES_SUBCOLLECTION]: riders
 		})
 			.then((docRef) => {
@@ -484,7 +549,6 @@ rhit.FbRiderRequestManager = class {
 			docSnapshot.get(rhit.FB_RIDES_KEY_DRIVER),
 			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPLOCATION),
 			docSnapshot.get(rhit.FB_RIDES_KEY_PICKUPTIME),
-			docSnapshot.get(rhit.FB_RIDES_KEY_PRICE),
 			docSnapshot.get(rhit.FB_RIDES_SUBCOLLECTION),
 		);
 		return rq;
@@ -496,35 +560,8 @@ rhit.FbRiderRequestManager = class {
 
 rhit.DriverDashboardController = class {
 	constructor() {
-		document.querySelector("#submitAddRide").addEventListener("click", async (event) => {
-			const destination = document.querySelector("#inputDestination").value;
-			const pickUpLocation = document.querySelector("#inputPickUpLocation").value;
-			const pickUpDate = document.querySelector("#inputPickUpDate").value;
-			const pickUpTime = document.querySelector("#inputPickUpTime").value;
-			const pickUpDateTime = this.convertToDatetimeLocal(pickUpDate, pickUpTime);
-			rhit.fbRideListManager.add(destination, "", pickUpLocation, pickUpDateTime, 0)
-			this.updateList();
-		});
-
-		$("#addDriveDialog").on("show.bs.modal", (event) => {
-			// Pre-animation
-			document.querySelector("#inputDestination").value = "";
-			document.querySelector("#inputPickUpLocation").value = "";
-			document.querySelector("#inputPickUpDate").value = "";
-			document.querySelector("#inputPickUpTime").value = "";
-		});
-		$("#addDriveDialog").on("shown.bs.modal", (event) => {
-			// Post-animation
-			document.querySelector("#inputDestination").focus();
-		});
-
 		// Start Listening!
 		rhit.fbRideListManager.beginListening(this.updateList.bind(this));
-		this.updateList();
-	}
-
-	convertToDatetimeLocal(pickUpDate, pickUpTime) {
-		return pickUpDate.replace(/\s+/g, '') + "T" + pickUpTime.replace(/\s+/g, '');
 	}
 
 	updateList() {
@@ -532,18 +569,18 @@ rhit.DriverDashboardController = class {
 		console.log(rhit.fbRideListManager.length);
 		console.log(rhit.fbRideListManager.getRideAtIndex(0));
 
-		const newList = htmlToElement('<div class="upcoming-rides-container"></div>');
+		const newList = htmlToElement('<div id="requestedRidesContainer" class="requested-rides-container"></div>');
 		for (let i = 0; i < rhit.fbRideListManager.length; i++) {
 			const rq = rhit.fbRideListManager.getRideAtIndex(i);
 			const newCard = this._createCard(rq);
 
 			newCard.onclick = (event) => {
-				window.location.href = `/ride.html?id=${rq.id}`;
+				window.location.href = `/request.html?id=${rq.id}`;
 			}
 
 			newList.appendChild(newCard);
 		}
-		const oldList = document.querySelector("#upcomingRidesContainer");
+		const oldList = document.querySelector("#requestedRidesContainer");
 		if (oldList) {
 			oldList.removeAttribute("id");
 			oldList.hidden = true;
@@ -592,7 +629,7 @@ rhit.HomePageController = class {
 
 		document.querySelector("#menuAccountPage").addEventListener("click", (event) => {
 			console.log("clicked Account");
-			window.location.href = "/accountPage.html";
+			window.location.href = `/accountPage.html?uid=${rhit.fbAuthManager.uid}`;
 		});
 	}
 }
@@ -681,7 +718,6 @@ rhit.RiderDashboardController = class {
 
 		// Start Listening!
 		rhit.fbRideListManager.beginListening(this.updateList.bind(this));
-		this.updateList();
 	}
 
 	convertToDatetimeLocal(pickUpDate, pickUpTime) {
@@ -728,6 +764,52 @@ rhit.RiderDashboardController = class {
 	}
 }
 
+rhit.AcountPageController = class {
+	constructor() {
+		// Start Listening!
+		rhit.fbAccountListManager.beginListening(this.updateList.bind(this));
+	}
+
+	updateList() {
+		console.log("I need to update the list on the page!");
+		console.log(rhit.fbAccountListManager.length);
+		console.log(rhit.fbAccountListManager.getRideAtIndex(0));
+
+		const newList = htmlToElement('<div id="yourRidesContainer" class="your-rides-container"></div>');
+		for (let i = 0; i < rhit.fbAccountListManager.length; i++) {
+			const rq = rhit.fbAccountListManager.getRideAtIndex(i);
+			const newCard = this._createCard(rq);
+
+			newCard.onclick = (event) => {
+				window.location.href = `/yourRide.html?id=${rq.id}`;
+			}
+
+			newList.appendChild(newCard);
+		}
+		const oldList = document.querySelector("#yourRidesContainer");
+		if (oldList) {
+			oldList.removeAttribute("id");
+			oldList.hidden = true;
+			oldList.parentElement.appendChild(newList);
+		}
+	}
+
+	_createCard(ride) {
+		const pickUpTime = ride.pickUpTime.toDate();
+		const formattedTime = pickUpTime.toLocaleString('en-US', {
+			month: 'long', day: 'numeric', year: 'numeric',
+			hour: 'numeric', minute: 'numeric',
+			hour12: true
+		});
+		return htmlToElement(`<div class="card">
+            <div class="card-body">
+              <h5 class="card-title">${ride.destination}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">${formattedTime}</h6>
+            </div>
+          </div>`);
+	}
+}
+
 rhit.RidePageController = class {
 	constructor() {
 		document.querySelector("#cancelBookingButton").addEventListener("click", (event) => {
@@ -737,6 +819,51 @@ rhit.RidePageController = class {
 			})
 		});
 
+		document.querySelector("#submitEditBooking").addEventListener("click", (event) => {
+			const destination = document.querySelector("#inputDestination").value;
+			const pickUpLocation = document.querySelector("#inputPickUpLocation").value;
+			const pickUpDate = document.querySelector("#inputPickUpDate").value;
+			const pickUpTime = document.querySelector("#inputPickUpTime").value;
+			const pickUpDateTime = this.convertToDatetimeLocal(pickUpDate, pickUpTime);
+			rhit.fbRideDetailManager.updateRide(pickUpLocation, pickUpDateTime);
+		});
+
+		$("#editBookingDialog").on("show.bs.modal", (event) => {
+			// Pre-animation
+			document.querySelector("#inputDestination").value = rhit.fbRideDetailManager.destination;
+			document.querySelector("#inputDestination").disabled = true;
+			document.querySelector("#inputPickUpLocation").value = rhit.fbRideDetailManager.pickupLocation;
+			document.querySelector("#inputPickUpDate").value = "";
+			document.querySelector("#inputPickUpTime").value = "";
+		});
+		$("#editBookingDialog").on("shown.bs.modal", (event) => {
+			// Post-animation
+			document.querySelector("#inputPickUpLocation").focus();
+		});
+
+		rhit.fbRideDetailManager.beginListening(this.updateView.bind(this));
+	}
+
+	convertToDatetimeLocal(pickUpDate, pickUpTime) {
+		return pickUpDate.replace(/\s+/g, '') + "T" + pickUpTime.replace(/\s+/g, '');
+	}
+
+	updateView() {
+		document.querySelector("#destinationField").innerHTML = rhit.fbRideDetailManager.destination;
+		document.querySelector("#driverField").innerHTML += rhit.fbRideDetailManager.driver;
+		document.querySelector("#pickupLocationField").innerHTML += rhit.fbRideDetailManager.pickupLocation;
+		document.querySelector("#pickupTimeField").innerHTML += rhit.fbRideDetailManager.pickupTime;
+		document.querySelector("#riderField").innerHTML += rhit.fbRideDetailManager.rider;
+	}
+}
+
+rhit.YourRidePageController = class {
+	constructor(rideId) {
+		this.rideId = rideId;
+		document.querySelector("#cancelRideButton").addEventListener("click", (event) => {
+			this.updateRideDriver();
+		});
+
 		rhit.fbRideDetailManager.beginListening(this.updateView.bind(this));
 	}
 	updateView() {
@@ -744,8 +871,60 @@ rhit.RidePageController = class {
 		document.querySelector("#driverField").innerHTML += rhit.fbRideDetailManager.driver;
 		document.querySelector("#pickupLocationField").innerHTML += rhit.fbRideDetailManager.pickupLocation;
 		document.querySelector("#pickupTimeField").innerHTML += rhit.fbRideDetailManager.pickupTime;
-		document.querySelector("#priceField").innerHTML += rhit.fbRideDetailManager.price;
 		document.querySelector("#riderField").innerHTML += rhit.fbRideDetailManager.rider;
+	}
+
+	async updateRideDriver() {
+		const rideRef = firebase.firestore().collection(rhit.FB_COLLECTION_RIDES).doc(this.rideId);
+		rideRef.update({
+			[rhit.FB_RIDES_KEY_DRIVER]: ""
+		})
+		.then(() => {
+			console.log("Driver successfully assigned!");
+			window.location.href = `/accountPage.html?uid=${rhit.fbAuthManager.uid}`;
+		})
+		.catch((error) => {
+			console.error("Error updating ride:", error);
+		});
+	}
+}
+
+rhit.RequestPageController = class {
+	constructor(rideId) {
+		this.rideId = rideId;
+		document.querySelector("#takeRideButton").addEventListener("click", (event) => {
+			this.updateRideDriver();
+		});
+
+		rhit.fbRideDetailManager.beginListening(this.updateView.bind(this));
+	}
+	updateView() {
+		document.querySelector("#destinationField").innerHTML = rhit.fbRideDetailManager.destination;
+		document.querySelector("#pickupLocationField").innerHTML += rhit.fbRideDetailManager.pickupLocation;
+		document.querySelector("#pickupTimeField").innerHTML += rhit.fbRideDetailManager.pickupTime;
+		document.querySelector("#riderField").innerHTML += rhit.fbRideDetailManager.rider;
+	}
+	async updateRideDriver() {
+		const rideRef = firebase.firestore().collection(rhit.FB_COLLECTION_RIDES).doc(this.rideId);
+		const rideDoc = await rideRef.get();
+		if (rideDoc.exists) {
+			const rideData = rideDoc.data();
+			const currentDriver = rideData[rhit.FB_RIDES_KEY_DRIVER];
+			if (currentDriver == rhit.fbAuthManager.uid) {
+				alert("You are already the driver!");
+				return;
+			}
+		}
+		rideRef.update({
+			[rhit.FB_RIDES_KEY_DRIVER]: rhit.fbAuthManager.uid
+		})
+		.then(() => {
+			console.log("Driver successfully assigned!");
+			window.location.href = `/driverDashboard.html?uid=${rhit.fbAuthManager.uid}`;
+		})
+		.catch((error) => {
+			console.error("Error updating ride:", error);
+		});
 	}
 }
 
@@ -770,14 +949,41 @@ rhit.FbRideDetailManager = class {
 		this._unsubscribe();
 	}
 
+	async getRideDetails() {
+		try {
+			const doc = await this._ref.get();
+			if (doc.exists) {
+			return doc.data();
+			} else {
+			console.log("No such document!");
+			return null;
+			}
+		} catch (error) {
+			console.error("Error getting document:", error);
+		}
+	}
+
+	async updateRide(pickUpLocation, pickUpTime) {
+		try {
+			await this._ref.update({
+			[rhit.FB_RIDES_KEY_PICKUPLOCATION]: pickUpLocation,
+			[rhit.FB_RIDES_KEY_PICKUPTIME]: firebase.firestore.Timestamp.fromDate(new Date(pickUpTime))
+			});
+			console.log("Ride successfully updated!");
+		} catch (error) {
+			console.error("Error updating ride:", error);
+		}
+	}
+
+
 	addRider(riderId) {
 		const ridersRef = this._documentSnapshot.ref.collection(rhit.FB_RIDES_SUBCOLLECTION);
 
 		ridersRef.doc(riderId).set({})
 			.then(() => {
 				console.log("Rider added with ID: ", riderId);
-				alert(`Booking for ${riderId} confirmed!`)
-				window.location.href = "/accountPage.html"
+				alert(`Booking for ${riderId} confirmed!`);
+				window.location.href = `/accountPage.html?uid=${rhit.fbAuthManager.uid}`;
 			})
 			.catch(error => {
 				console.error("Error adding rider: ", error);
@@ -806,11 +1012,11 @@ rhit.FbRideDetailManager = class {
 		});
 		return formattedTime;
 	}
-	get price() {
-		return "$" + this._documentSnapshot.get(rhit.FB_RIDES_KEY_PRICE);
-	}
 	get rider() {
 		return this._documentSnapshot.get(rhit.FB_RIDES_RIDER);
+	}
+	get rideId() {
+		return this.rideId;
 	}
 }
 
@@ -851,13 +1057,17 @@ rhit.checkForRedirects = async function () {
 		if (!exists) { // if not, send user to driver registration
 			window.location.href = "#";
 		} else {
-			window.location.href = "/driverDashboard.html";
+			window.location.href = `/driverDashboard.html?uid=${rhit.fbAuthManager.uid}`;
 		}
 	}
 };
 
 rhit.initializePage = function () {
 	const urlParams = new URLSearchParams(window.location.search);
+
+	if (document.querySelector("#requestPage")) {
+		new rhit.HomePageController();
+	}
 
 	if (document.querySelector("#homePage")) {
 		console.log("You are on the home page");
@@ -891,9 +1101,10 @@ rhit.initializePage = function () {
 		console.log("You are on the driver dashboard page");
 		const uid = urlParams.get("uid");
 
+		rhit.fbRideListManager = new rhit.FbRideListManager(uid);
+		this.fbRiderRequestManager = new rhit.FbRiderRequestManager();
 		new rhit.HomePageController();
 		new rhit.DriverDashboardController();
-		this.fbRiderRequestManager = new rhit.FbRiderRequestManager();
 	}
 
 	if (document.querySelector("#riderRegisterPage")) {
@@ -918,10 +1129,16 @@ rhit.initializePage = function () {
 		console.log("You are on account page");
 		const uid = urlParams.get("uid");
 
+		rhit.fbAccountListManager = new rhit.FbAccountListManager(uid);
+		new rhit.AcountPageController();
 		new rhit.HomePageController();
 	}
 
 	if (document.querySelector("#ridePage")) {
+		new rhit.HomePageController();
+	}
+
+	if (document.querySelector("#yourRidePage")) {
 		new rhit.HomePageController();
 	}
 };
@@ -941,6 +1158,33 @@ rhit.main = function () {
 
 		rhit.fbRideDetailManager = new rhit.FbRideDetailManager(rideId);
 		new rhit.RidePageController();
+	}
+
+	if (document.querySelector("#yourRidePage")) {
+		const queryString = window.location.search;
+		console.log(queryString);
+		const urlParams = new URLSearchParams(queryString);
+		const rideId = urlParams.get("id");
+		if (!rideId) {
+			window.location.href = `/accountPage.html?uid=${rhit.fbAuthManager.uid}`;
+		}
+
+		rhit.fbRideDetailManager = new rhit.FbRideDetailManager(rideId);
+		new rhit.YourRidePageController(rideId);
+	}
+
+
+	if (document.querySelector("#requestPage")) {
+		const queryString = window.location.search;
+		console.log(queryString);
+		const urlParams = new URLSearchParams(queryString);
+		const rideId = urlParams.get("id");
+		if (!rideId) {
+			window.location.href = `/driverDashboard.html?uid=${rhit.fbAuthManager.uid}`;
+		}
+
+		rhit.fbRideDetailManager = new rhit.FbRideDetailManager(rideId);
+		new rhit.RequestPageController(rideId);
 	}
 
 	console.log("Ready");

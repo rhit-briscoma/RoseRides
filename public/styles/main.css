@@ -103,18 +103,37 @@ body {
     cursor: pointer;
 }
 
-.upcoming-rides-container {
+.upcoming-rides-container,
+.requested-rides-container,
+.your-rides-container{
     background: #f2f2f2;
     padding: 20px;
     border-radius: 5px;
     margin-top: 20px;
 }
 
-.upcoming-rides-container h2 {
+.upcoming-rides-container h2,
+.requested-rides-container h2,
+.your-rides-container h2{
     font-family: 'Jockey One', sans-serif;
     font-size: 24px;
     color: #800000;
     margin-bottom: 20px;
+}
+
+#driverTitle {
+    margin: 100px 20px 20px 20px;
+    color: #800000;
+}
+
+#riderTitle {
+    margin: 100px 20px 20px 20px;
+    color: #800000;
+}
+
+#accountTitle {
+    margin: 100px 20px 20px 20px;
+    color: #800000;
 }
 
 .ride-card {
@@ -286,8 +305,26 @@ body {
     font-size: 45px;
     font-weight: bold;
 }
+#requestPage .card-title {
+    font-size: 45px;
+    font-weight: bold;
+}
+#yourRidePage .card-title {
+    font-size: 45px;
+    font-weight: bold;
+}
 
 #ridePage .card-subtitle {
+    font-weight: normal;
+    font-size: 35px;
+}
+
+#requestPage .card-subtitle {
+    font-weight: normal;
+    font-size: 35px;
+}
+
+#yourRidePage .card-subtitle {
     font-weight: normal;
     font-size: 35px;
 }
@@ -300,6 +337,51 @@ body {
 }
 
 #cancelBookingButton:hover {
+    font-size: 24px;
+    color: #e0e0e0;
+    background: #720000;
+    transform: scale(1.05);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#takeRideButton {
+    margin: 20px;
+    font-size: 24px;
+    color: white;
+    background: #800000;
+}
+
+#takeRideButton:hover {
+    font-size: 24px;
+    color: #e0e0e0;
+    background: #720000;
+    transform: scale(1.05);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#cancelRideButton {
+    margin: 20px;
+    font-size: 24px;
+    color: white;
+    background: #800000;
+}
+
+#cancelRideButton:hover {
+    font-size: 24px;
+    color: #e0e0e0;
+    background: #720000;
+    transform: scale(1.05);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#editBookingButton {
+    margin: 20px;
+    font-size: 24px;
+    color: white;
+    background: #800000;
+}
+
+#editBookingButton:hover {
     font-size: 24px;
     color: #e0e0e0;
     background: #720000;
@@ -323,6 +405,11 @@ body {
 
 #submitAddRide,
 #submitSaveRide {
+    color: #800000;
+    z-index: 1050;
+}
+
+#submitEditBooking {
     color: #800000;
     z-index: 1050;
 }

@@ -31,7 +31,7 @@
           <span class="sr-only">Toggle drawer</span>
           <i class="material-icons no-outline rosered icon-medium">menu</i>
         </button>
-        <a class="navbar-brand rosered jockey-one-regular navbar-text" href="/riderDashboard.html">&nbsp;&nbsp;RoseRides</a>
+        <a class="navbar-brand rosered jockey-one-regular navbar-text" href="#">&nbsp;&nbsp;RoseRides</a>
       </div>
     </header>
     
@@ -49,15 +49,20 @@
       </ul>
     </div>
     <main class="bmd-layout-content">
-      <div id="accountPage" class="container page-container">
-
-        <h1 id="accountTitle">Your Rides</h1>
-
-        <div id="yourRidesContainer" class="your-rides-container"></div>
-
+      <div id="requestPage" class="container page-container">
+        <div class="card">
+          <div class="card-body">
+            <h5 id="destinationField" class="card-title"></h5>
+            <h6 id="pickupLocationField" class="card-subtitle mb-2 text-muted"><strong>Pick Up:</strong> </h6>
+            <h6 id="pickupTimeField" class="card-subtitle mb-2 text-muted"><strong>Pick Up Time:</strong> </h6>
+            <h6 id="riderField" class="card-subtitle mb-2 text-muted"><strong>Rider:</strong> </h6>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <button id="takeRideButton" type="button" class="btn btn-primary">Take Ride</button>
+        </div>
       </div>
     </main>
-
   </div>
 
   <script src="scripts/jquery.min.js"></script>
